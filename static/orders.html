@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Заказы — FIREBOOKS</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/cabinet.css">
+</head>
+<body>
+
+<!-- ШАПКА -->
+<header class="header">
+  <div class="container header__inner">
+    <a href="/" class="logo">
+      <img
+        src="/static/img/Безымянный-1.png"
+        alt="FIREBOOKS"
+        class="logo__img"
+      >
+    </a>
+
+    <nav class="nav">
+      <ul class="nav__list">
+        <li class="nav__item">
+          <a href="/" class="nav__link">Каталог</a>
+        </li>
+        <li class="nav__item">
+          <a href="/my-books" class="nav__link">Мои книги</a>
+        </li>
+        <li class="nav__item">
+          <a href="/cart" class="nav__link">Корзина</a>
+        </li>
+        <li class="nav__item">
+          <a
+            href="/orders"
+            class="nav__link nav__link--active"
+            aria-current="page"
+          >
+            Заказы
+          </a>
+        </li>
+        <li class="nav__item user-dropdown">
+          <a
+            href="/profile"
+            class="nav__link nav__link--user"
+            id="user-menu"
+          >
+            <span class="user-name">Профиль</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <form
+      class="search"
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <input
+        type="search"
+        name="q"
+        class="search__input"
+        placeholder="Поиск книг..."
+        aria-label="Поиск книг"
+      >
+      <button
+        type="submit"
+        class="search__btn"
+        aria-label="Найти"
+      >
+        ⌕
+      </button>
+    </form>
+  </div>
+</header>
+
+<!-- ЗАКАЗЫ -->
+<main class="cabinet">
+  <div class="container">
+    <h1 class="cabinet__title">Мои заказы</h1>
+
+    <section class="cabinet__section">
+      <div class="section-head">
+        <h2 class="section-title">История заказов</h2>
+      </div>
+
+      <p id="orders-empty" hidden>
+        У вас пока нет оформленных заказов.
+        <a href="/">Посмотреть каталог книг →</a>
+      </p>
+
+      <div id="orders-list"></div>
+    </section>
+  </div>
+</main>
+
+<!-- ФУТЕР -->
+<footer class="footer">
+  <div class="container footer__inner">
+
+    <div class="footer__col">
+      <h3 class="footer__heading">О компании</h3>
+      <ul class="footer__list">
+        <li><a href="#">О FIREBOOKS</a></li>
+        <li>
+          <a href="#">Политика конфиденциальности</a>
+        </li>
+        <li><a href="#">Вакансии</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Покупателям</h3>
+      <ul class="footer__list">
+        <li>
+          <a href="#">Программа лояльности</a>
+        </li>
+        <li>
+          <a href="#">Подарочные сертификаты</a>
+        </li>
+        <li><a href="#">Оплата и доставка</a></li>
+        <li><a href="#">Правила возврата</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Контакты</h3>
+      <ul class="footer__list">
+        <li><a href="#">Контакты и реквизиты</a></li>
+        <li>
+          <a href="#">Помощь и ответы на вопросы</a>
+        </li>
+        <li><a href="#">Обратная связь</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <img
+    src="/static/img/Безымянный-1.png"
+    alt="FIREBOOKS"
+    class="logo__img footer__logo"
+  >
+
+  <div class="container footer__bottom">
+    <div class="footer__socials">
+      <a href="#" class="social" aria-label="VK">VK</a>
+      <a href="#" class="social" aria-label="Telegram">TG</a>
+      <a href="#" class="social" aria-label="TikTok">TT</a>
+      <a href="#" class="social" aria-label="YouTube">YT</a>
+    </div>
+
+    <p class="footer__copyright">
+      2024–2026, ООО «ГРАМОТА»
+      <a
+        href="/recommend"
+        class="footer__recommend-link"
+      >
+        На информационном ресурсе применяются
+        рекомендательные технологии
+      </a>
+    </p>
+  </div>
+</footer>
+
+<!-- Подключаем только cabinet.js.
+     script.js не нужен для отображения заказов. -->
+<script src="/static/cabinet.js"></script>
+
+<script>
+"use strict";
+
+(() => {
+  const list = document.getElementById("orders-list");
+  const empty = document.getElementById("orders-empty");
+
+  function make(tag, className = "", text = "") {
+    const element = document.createElement(tag);
+    element.className = className;
+    element.textContent = text;
+    return element;
+  }
+
+  function money(value) {
+    return (Number(value) || 0).toLocaleString("ru-RU") + " ₽";
+  }
+
+  function formatDate(value) {
+    if (!value) return "Дата неизвестна";
+
+    const date = new Date(
+      String(value).replace(" ", "T") + (
+        String(value).includes("Z") ? "" : ""
+      )
+    );
+
+    if (Number.isNaN(date.getTime())) {
+      return String(value);
+    }
+
+    return date.toLocaleString("ru-RU");
+  }
+
+  function deliveryName(method) {
+    return {
+      pickup: "Самовывоз",
+      courier: "Курьер",
+      post: "Почта России"
+    }[method] || "Не указан";
+  }
+
+  function renderOrders(orders) {
+    list.replaceChildren();
+    empty.hidden = orders.length > 0;
+
+    orders.forEach(order => {
+      const card = make("article", "cabinet__card");
+      card.style.padding = "24px";
+      card.style.marginBottom = "24px";
+
+      const heading = make(
+        "h3",
+        "",
+        "Заказ " + (order.number || order.id)
+      );
+
+      const date = make(
+        "p",
+        "",
+        "Оформлен: " + formatDate(order.created_at)
+      );
+
+      const status = make(
+        "p",
+        "",
+        "Статус: " + (order.status || "Новый")
+      );
+
+      card.append(heading, date, status);
+
+      const products = make("div", "checkout__items");
+      products.style.marginTop = "20px";
+
+      for (const item of order.items || []) {
+        const product = make("div", "checkout__item");
+        product.style.marginBottom = "16px";
+
+        const cover = document.createElement("img");
+        cover.className = "checkout__item-cover";
+        cover.src = item.cover || "";
+        cover.alt = item.title || "Обложка";
+        cover.loading = "lazy";
+
+        const info = make("div", "checkout__item-info");
+
+        info.append(
+          make("p", "checkout__item-title", item.title || "Книга"),
+          make("p", "checkout__item-author", item.author || ""),
+          make(
+            "p",
+            "checkout__item-price",
+            money(item.price) + " × " + item.quantity +
+            " = " + money(Number(item.price) * Number(item.quantity))
+          )
+        );
+
+        product.append(cover, info);
+        products.appendChild(product);
+      }
+
+      card.appendChild(products);
+
+      card.appendChild(
+        make(
+          "p",
+          "",
+          "Доставка: " + deliveryName(order.delivery_method)
+        )
+      );
+
+      if (order.delivery_address) {
+        card.appendChild(
+          make("p", "", "Адрес: " + order.delivery_address)
+        );
+      }
+
+      card.appendChild(
+        make(
+          "p",
+          "",
+          "Стоимость доставки: " + money(order.delivery_price)
+        )
+      );
+
+      const total = make(
+        "p",
+        "",
+        "Итого: " + money(order.total)
+      );
+
+      total.style.fontWeight = "700";
+      total.style.fontSize = "20px";
+      total.style.marginTop = "16px";
+
+      card.appendChild(total);
+      list.appendChild(card);
+    });
+  }
+
+  async function loadOrders() {
+    empty.hidden = true;
+    list.textContent = "Загружаем заказы...";
+
+    try {
+      const response = await fetch("/api/orders", {
+        credentials: "same-origin"
+      });
+
+      if (response.status === 401) {
+        throw new Error(
+          "Войдите в аккаунт, чтобы посмотреть заказы."
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error("Не удалось загрузить заказы.");
+      }
+
+      const data = await response.json();
+      renderOrders(Array.isArray(data.orders) ? data.orders : []);
+
+    } catch (error) {
+      list.textContent = error.message;
+      empty.hidden = true;
+      console.error(error);
+    }
+  }
+
+  async function loadProfile() {
+    try {
+      const response = await fetch("/api/auth/me", {
+        credentials: "same-origin"
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const name = data.user?.name;
+
+      if (name) {
+        document.querySelector(".user-name").textContent = name;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  loadProfile();
+  loadOrders();
+})();
+</script>
+
+</body>
+</html>

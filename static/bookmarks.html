@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Закладки — FIREBOOKS</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/cabinet.css">
+</head>
+<body>
+
+<!-- ШАПКА -->
+<header class="header">
+  <div class="container header__inner">
+    <a href="/" class="logo">
+      <img src="/static/img/Безымянный-1.png"
+           alt="FIREBOOKS" class="logo__img">
+    </a>
+
+    <nav class="nav">
+      <ul class="nav__list">
+        <li class="nav__item">
+          <a href="/" class="nav__link">Каталог</a>
+        </li>
+        <li class="nav__item">
+          <a href="/library" class="nav__link nav__link--active">
+            Мои книги
+          </a>
+        </li>
+        <li class="nav__item">
+          <a href="/cart" class="nav__link">Корзина</a>
+        </li>
+        <li class="nav__item">
+          <a href="/orders" class="nav__link">Заказы</a>
+        </li>
+        <li class="nav__item user-dropdown">
+          <a href="/profile"
+             class="nav__link nav__link--user"
+             id="user-menu">
+            <span class="user-name">Профиль</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <form class="search" action="/search" method="get" role="search">
+      <input type="search"
+             name="q"
+             class="search__input"
+             placeholder="Поиск книг..."
+             aria-label="Поиск книг">
+      <button type="submit"
+              class="search__btn"
+              aria-label="Найти">
+        ⌕
+      </button>
+    </form>
+  </div>
+</header>
+
+<!-- ЛИЧНЫЙ КАБИНЕТ -->
+<main class="cabinet">
+  <div class="cabinet__wrapper">
+
+    <!-- БОКОВОЕ МЕНЮ -->
+    <aside class="sidebar">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar" id="sidebar-avatar">?</div>
+        <span class="sidebar__name" id="sidebar-name">Пользователь</span>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="/library" class="sidebar__item">
+          <svg width="20" height="20"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+          </svg>
+          <span class="sidebar__label">Библиотека</span>
+          <span class="sidebar__badge" id="library-count">0</span>
+        </a>
+
+        <a href="/bookmarks"
+           class="sidebar__item sidebar__item--active"
+           aria-current="page">
+          <svg width="20" height="20"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+          </svg>
+          <span class="sidebar__label">Закладки</span>
+          <span class="sidebar__badge" id="bookmarks-count">0</span>
+        </a>
+
+        <a href="/my-reviews" class="sidebar__item">
+          <svg width="20" height="20"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="2">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+          <span class="sidebar__label">Мои отзывы</span>
+          <span class="sidebar__badge" id="reviews-count">0</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__bottom">
+        <a href="/" class="sidebar__bottom-link">Каталог</a>
+        <a href="/cart" class="sidebar__bottom-link">Корзина</a>
+        <a href="/orders" class="sidebar__bottom-link">Заказы</a>
+      </div>
+    </aside>
+
+    <!-- СОДЕРЖИМОЕ -->
+    <div class="cabinet__content">
+      <h1 class="cabinet__title">Закладки</h1>
+
+      <p id="bookmarks-loading" role="status">
+        Загружаем избранные книги...
+      </p>
+
+      <p id="bookmarks-empty" hidden>В закладках пока нет книг.
+        <a href="/">Перейти в каталог →</a>
+      </p>
+
+      <p id="bookmarks-error" hidden role="alert">
+        Не удалось загрузить некоторые книги.
+        Попробуйте обновить страницу.
+      </p>
+
+      <div class="cabinet__grid" id="bookmarks-grid"></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ФУТЕР -->
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__col">
+      <h3 class="footer__heading">О компании</h3>
+      <ul class="footer__list">
+        <li><a href="#">О FIREBOOKS</a></li>
+        <li><a href="#">Политика конфиденциальности</a></li>
+        <li><a href="#">Вакансии</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Покупателям</h3>
+      <ul class="footer__list">
+        <li><a href="#">Программа лояльности</a></li>
+        <li><a href="#">Подарочные сертификаты</a></li>
+        <li><a href="#">Оплата и доставка</a></li>
+        <li><a href="#">Правила возврата</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Контакты</h3>
+      <ul class="footer__list">
+        <li><a href="#">Контакты и реквизиты</a></li>
+        <li><a href="#">Помощь и ответы на вопросы</a></li>
+        <li><a href="#">Обратная связь</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <img src="/static/img/Безымянный-1.png"
+       alt="FIREBOOKS"
+       class="logo__img footer__logo">
+
+  <div class="container footer__bottom">
+    <div class="footer__socials">
+      <a href="#" class="social" aria-label="VK">VK</a>
+      <a href="#" class="social" aria-label="Telegram">TG</a>
+      <a href="#" class="social" aria-label="TikTok">TT</a>
+      <a href="#" class="social" aria-label="YouTube">YT</a>
+    </div>
+
+    <p class="footer__copyright">
+      2024–2026, ООО «ГРАМОТА»
+      <a href="/recommend" class="footer__recommend-link">
+        На информационном ресурсе применяются
+        рекомендательные технологии
+      </a>
+    </p>
+  </div>
+</footer>
+
+<script>
+"use strict";
+
+(() => {
+  const FAVORITES_KEY = "firebooks_favorites";
+  const REVIEWS_KEY = "firebooks_reviews";
+  const ORDERS_KEY = "firebooks_orders";
+  const CHECKOUT_KEY = "firebooks_checkout";
+
+  const grid = document.getElementById("bookmarks-grid");
+  const loading = document.getElementById("bookmarks-loading");
+  const empty = document.getElementById("bookmarks-empty");
+  const errorMessage = document.getElementById("bookmarks-error");
+
+  const money = value =>
+    (Number(value) || 0).toLocaleString("ru-RU") + " ₽";
+
+  function readArray(key) {
+    try {
+      const data = JSON.parse(localStorage.getItem(key) || "[]");
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function bookId(item) {
+    if (item && typeof item === "object") {
+      return String(item.id ?? "").trim();
+    }
+
+    return String(item ?? "").trim();
+  }
+
+  let savedFavoriteIds = [];
+
+  function favoriteIds() {
+    return savedFavoriteIds;
+  }
+
+  function extractFavoriteIds(data) {
+    const items = Array.isArray(data)
+      ? data
+      : data?.favorites ?? data?.books ?? [];
+
+    if (!Array.isArray(items)) {
+      throw new Error("Неизвестный формат закладок");
+    }
+
+    return [...new Set(
+      items
+        .map(item => {
+          if (item && typeof item === "object") {
+            return item.book_id ?? item.id ?? item.book?.id;
+          }
+          return item;
+        })
+        .filter(id => id !== null && id !== undefined)
+        .map(String)
+    )];
+  }
+
+  async function loadFavoriteIds() {
+    const response = await fetch("/api/favorites", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+
+    if (response.status === 401) {
+      savedFavoriteIds = [];
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error("Ошибка загрузки закладок: " + response.status);
+    }
+
+    savedFavoriteIds = extractFavoriteIds(await response.json());
+  }
+
+  async function updateProfile() {
+    try {
+      const response = await fetch("/api/auth/me", {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error("Не удалось получить профиль");
+      }
+
+      const data = await response.json();
+      const name = data.user?.name || "Гость";
+
+      document.querySelector(".user-name").textContent = name;
+      document.getElementById("sidebar-name").textContent = name;
+      document.getElementById("sidebar-avatar").textContent =
+        name.charAt(0).toUpperCase();
+    } catch (error) {
+      console.error("Ошибка загрузки профиля:", error);
+    }
+  }
+
+  function updateCounters() {
+    document.getElementById("bookmarks-count").textContent =
+      favoriteIds().length;
+
+    document.getElementById("reviews-count").textContent =
+      readArray(REVIEWS_KEY).length;
+
+    // Количество разных книг в оформленных заказах.
+    const purchased = new Set();
+
+    readArray(ORDERS_KEY).forEach(order => {
+      if (!Array.isArray(order.items)) return;
+
+      order.items.forEach(item => {
+        const id = bookId(item);
+        if (id) purchased.add(id);
+      });
+    });
+
+    document.getElementById("library-count").textContent =
+      purchased.size;
+  }
+
+  function make(tag, className, text) {
+    const element = document.createElement(tag);
+
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+
+    return element;
+  }
+
+  function parsePrice(value) {
+    if (typeof value === "number") return value;
+
+    return Number(
+      String(value ?? "0").replace(/[^\d]/g, "")
+    ) || 0;
+  }
+
+  async function fetchBook(id) {
+    const response = await fetch(
+      "/api/books/" + encodeURIComponent(id)
+    );
+
+    if (!response.ok) {
+      throw new Error("Книга " + id + " не найдена");
+    }
+
+    return response.json();
+  }
+
+  async function removeFavorite(id) {
+    try {
+      const response = await fetch(
+        "/api/favorites/" + encodeURIComponent(id),
+        {
+          method: "DELETE",
+          credentials: "same-origin"
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Ошибка удаления: " + response.status);
+      }
+
+      savedFavoriteIds = savedFavoriteIds.filter(
+        bookId => bookId !== String(id)
+      );
+
+      updateCounters();
+      await renderBookmarks();
+    } catch (error) {
+      console.error("Не удалось удалить закладку:", error);
+      alert("Не удалось удалить книгу из закладок.");
+    }
+  }
+
+  function buyBook(book) {
+    const item = {
+      id: book.id,
+      cover: book.cover_url || "",
+      title: book.title,
+      author: book.author,
+      price: parsePrice(book.new_price),
+      priceText: money(book.new_price),
+      quantity: 1
+    };
+
+    localStorage.setItem(
+      CHECKOUT_KEY,
+      JSON.stringify([item])
+    );
+
+    window.location.href = "/checkout";
+  }
+
+  function createBookCard(book) {
+    const wrapper = make("div", "cabinet__card");
+    const card = make("div", "book-card");
+
+    // ОБЛОЖКА
+    const cover = make("div", "book-card__cover");
+    const link = make("a");
+
+    link.href = "/book?id=" + encodeURIComponent(book.id);
+
+    const image = make("img");
+    image.src = book.cover_url || "";
+    image.alt = book.title || "Обложка книги";
+    image.loading = "lazy";
+
+    link.appendChild(image);
+    cover.appendChild(link);
+
+    const discount = Number(book.discount) || 0;
+
+    if (discount > 0) {
+      cover.appendChild(
+        make("span", "book-card__discount", "-" + discount + "%")
+      );
+    }
+
+    const favoriteButton = make(
+      "button",
+      "book-card__fav active",
+      "♥"
+    );
+
+    favoriteButton.type = "button";
+    favoriteButton.setAttribute(
+      "aria-label",
+      "Удалить из закладок"
+    );
+    favoriteButton.setAttribute("aria-pressed", "true");
+
+    favoriteButton.addEventListener("click", () => {
+      removeFavorite(book.id);
+    });
+
+    cover.appendChild(favoriteButton);
+
+    // ИНФОРМАЦИЯ
+    const info = make("div", "book-card__info");
+
+    info.appendChild(
+      make("p", "book-card__type", book.cover_type || "")
+    );
+
+    const prices = make("div", "book-card__prices");
+
+    if (Number(book.old_price) > Number(book.new_price)) {
+      prices.appendChild(
+        make(
+          "span",
+          "book-card__old-price",
+          money(book.old_price)
+        )
+      );
+    }
+
+    prices.appendChild(
+      make(
+        "span",
+        "book-card__new-price",
+        money(book.new_price)
+      )
+    );
+
+    info.appendChild(prices);
+
+    const title = make("a", "book-card__title", book.title);
+
+    title.href = "/book?id=" + encodeURIComponent(book.id);
+    info.appendChild(title);
+
+    info.appendChild(
+      make("p", "book-card__author", book.author || "")
+    );
+
+    // РЕЙТИНГ
+    const rating = make("div", "book-card__rating");
+    const ratingValue = Math.max(
+      0,
+      Math.min(5, Number(book.rating) || 0)
+    );
+
+    for (let i = 1; i <= 5; i++) {
+      rating.appendChild(
+        make(
+          "span",
+          i <= ratingValue ? "star filled" : "star",
+          "★"
+        )
+      );
+    }
+
+    rating.appendChild(
+      make(
+        "span",
+        "book-card__reviews",
+        String(book.reviews_count || 0)
+      )
+    );
+
+    info.appendChild(rating);
+
+    // КУПИТЬ
+    const buyButton = make(
+      "button",
+      "book-card__btn",
+      "Купить"
+    );
+
+    buyButton.type = "button";
+    buyButton.addEventListener("click", () => buyBook(book));
+
+    info.appendChild(buyButton);
+
+    card.append(cover, info);
+    wrapper.appendChild(card);
+
+    return wrapper;
+  }
+
+  let renderVersion = 0;
+
+  async function renderBookmarks() {
+  const currentVersion = ++renderVersion;
+
+  grid.replaceChildren();
+  errorMessage.hidden = true;
+  empty.hidden = true;
+  loading.hidden = false;
+
+  try {
+    await loadFavoriteIds();
+
+    if (currentVersion !== renderVersion) return;
+
+    updateCounters();
+
+    const ids = favoriteIds();
+
+    if (!ids.length) {
+      loading.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+
+    const results = await Promise.allSettled(
+      ids.map(fetchBook)
+    );
+
+    if (currentVersion !== renderVersion) return;
+
+    loading.hidden = true;
+
+    let failed = 0;
+
+    results.forEach(result => {
+      if (result.status === "fulfilled") {
+        grid.appendChild(createBookCard(result.value));
+      } else {
+        failed++;
+        console.warn(result.reason);
+      }
+    });
+
+    errorMessage.hidden = failed === 0;
+
+    if (!grid.children.length && failed === 0) {
+      empty.hidden = false;
+    }
+  } catch (error) {
+    if (currentVersion !== renderVersion) return;
+
+    console.error("Ошибка загрузки закладок:", error);
+    loading.hidden = true;
+    errorMessage.textContent =
+      "Не удалось загрузить закладки. Попробуйте обновить страницу.";
+    errorMessage.hidden = false;
+  }
+}
+
+  updateProfile();
+  renderBookmarks();
+
+  window.addEventListener("storage", event => {
+    if (
+      event.key === FAVORITES_KEY ||
+      event.key === ORDERS_KEY ||
+      event.key === REVIEWS_KEY
+    ) {
+      updateCounters();
+
+      if (event.key === FAVORITES_KEY) {
+        renderBookmarks();
+      }
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

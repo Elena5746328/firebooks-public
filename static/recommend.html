@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Рекомендательные технологии — FIREBOOKS</title>
+
+  <link rel="stylesheet" href="/static/style.css">
+
+  <style>
+    .recommend-page {
+      padding: 50px 0 80px;
+    }
+
+    .recommend-page__title {
+      margin-bottom: 28px;
+    }
+
+    .recommend-page__intro {
+      margin-bottom: 30px;
+      line-height: 1.7;
+    }
+
+    .recommend-page__content {
+      max-width: 950px;
+      line-height: 1.8;
+    }
+
+    .recommend-page__heading {
+      margin: 36px 0 18px;
+    }
+
+    .recommend-page__subheading {
+      margin: 28px 0 14px;
+    }
+
+    .recommend-page__content p {
+      margin-bottom: 16px;
+    }
+
+    .recommend-page__content ul {
+      padding-left: 25px;
+      margin-bottom: 22px;
+    }
+
+    .recommend-page__content li {
+      margin-bottom: 10px;
+    }
+
+    .recommend-page__notice {
+      margin: 24px 0;
+      padding: 20px;
+      border-left: 4px solid #d86a39;
+      background: #faf6f2;
+      line-height: 1.7;
+    }
+
+    .recommend-page__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 30px;
+    }
+
+    .recommend-page__links a {
+      color: inherit;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ШАПКА -->
+<header class="header">
+  <div class="container header__inner">
+
+    <a href="/" class="logo">
+      <img
+        src="/static/img/Безымянный-1.png"
+        alt="FIREBOOKS"
+        class="logo__img"
+      >
+    </a>
+
+    <nav class="nav">
+      <ul class="nav__list">
+
+        <li class="nav__item">
+          <a href="/" class="nav__link">
+            Каталог
+          </a>
+        </li>
+
+        <li class="nav__item">
+          <a href="/library" class="nav__link">
+            Мои книги
+          </a>
+        </li>
+
+        <li class="nav__item">
+          <a href="/cart" class="nav__link">
+            Корзина
+          </a>
+        </li>
+
+        <li class="nav__item">
+          <a href="/orders" class="nav__link">
+            Заказы
+          </a>
+        </li>
+
+        <li class="nav__item user-dropdown">
+          <a
+            href="/profile"
+            class="nav__link nav__link--user"
+            id="user-menu"
+          >
+            <span class="user-name">Профиль</span>
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+
+    <form
+      class="search"
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <input
+        type="search"
+        name="q"
+        class="search__input"
+        placeholder="Поиск книг..."
+        aria-label="Поиск книг"
+      >
+
+      <button
+        type="submit"
+        class="search__btn"
+        aria-label="Найти"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line
+            x1="21"
+            y1="21"
+            x2="16.65"
+            y2="16.65"
+          ></line>
+        </svg>
+      </button>
+    </form>
+
+  </div>
+</header>
+
+<!-- ОСНОВНОЙ КОНТЕНТ -->
+<main class="recommend-page">
+  <div class="container">
+
+    <h1 class="recommend-page__title">
+      Рекомендательные технологии
+    </h1>
+
+    <p class="recommend-page__intro">
+      На этой странице описаны принципы отображения
+      книг и работы с пользовательскими предпочтениями
+      в учебном веб-проекте FIREBOOKS.
+    </p>
+
+    <div class="recommend-page__notice">
+      <strong>Обратите внимание:</strong>
+      FIREBOOKS является учебным проектом книжного
+      интернет-магазина. В текущей версии не реализована
+      полноценная персонализированная рекомендательная
+      система на основе машинного обучения.
+    </div>
+
+    <div class="recommend-page__content">
+
+      <h2 class="recommend-page__heading">
+        1. Общая информация
+      </h2>
+
+      <p>
+        <strong>1.1.</strong>
+        FIREBOOKS — учебный веб-сайт, на котором
+        пользователи могут просматривать каталог книг,
+        открывать карточки товаров, добавлять книги
+        в закладки и корзину, а также оформлять
+        демонстрационные заказы.
+      </p>
+
+      <p>
+        <strong>1.2.</strong>
+        Под пользовательскими предпочтениями
+        в рамках проекта понимаются действия
+        пользователя, связанные с выбором книг,
+        выставлением оценок и написанием отзывов.
+      </p>
+
+      <p>
+        <strong>1.3.</strong>
+        В текущей реализации сведения о закладках,
+        корзине, заказах и отзывах сохраняются
+        локально в браузере пользователя.
+      </p>
+
+      <h2 class="recommend-page__heading">
+        2. Какие сведения используются на сайте
+      </h2>
+
+      <p>
+        Для работы отдельных функций FIREBOOKS
+        используются следующие данные:
+      </p>
+
+      <ul>
+        <li>
+          <strong>Закладки.</strong>
+          Идентификаторы книг, которые пользователь
+          добавил в избранное.
+        </li>
+
+        <li>
+          <strong>Корзина.</strong>
+          Выбранные книги, их количество
+          и стоимость.
+        </li>
+
+        <li>
+          <strong>Демонстрационные заказы.</strong>
+          Состав заказов, дата оформления,
+          выбранный способ доставки и данные,
+          введённые при оформлении.
+        </li>
+
+        <li>
+          <strong>Отзывы.</strong>
+          Оценки и тексты отзывов,
+          сохранённые пользователем.
+        </li>
+      </ul>
+
+      <p>
+        Эти сведения используются для отображения
+        соответствующих разделов личного кабинета.
+        Само их сохранение не означает, что сайт
+        автоматически анализирует предпочтения
+        для персонального подбора книг.
+      </p>
+
+      <h2 class="recommend-page__heading">
+        3. Как отображаются книги
+      </h2>
+
+      <p>
+        <strong>3.1.</strong>
+        Книги в каталоге загружаются из данных,
+        предоставляемых сервером FIREBOOKS.
+      </p>
+
+      <p>
+        <strong>3.2.</strong>
+        Пользователь может самостоятельно выбирать
+        книги, просматривать их описания и выполнять
+        поиск по каталогу.
+      </p>
+
+      <p>
+        <strong>3.3.</strong>
+        Раздел «Закладки» отображает книги,
+        ранее сохранённые пользователем.
+      </p>
+
+      <p>
+        <strong>3.4.</strong>
+        Раздел «Библиотека» отображает книги
+        из оформленных демонстрационных заказов.
+      </p>
+
+      <p>
+        <strong>3.5.</strong>
+        Раздел «Мои отзывы» отображает оценки
+        и тексты отзывов, сохранённые пользователем.
+      </p>
+
+      <h2 class="recommend-page__heading">
+        4. Может ли пользователь влиять на содержимое
+      </h2>
+
+      <p>
+        Пользователь самостоятельно управляет
+        некоторыми разделами FIREBOOKS:
+      </p>
+
+      <ul>
+        <li>
+          Добавляет книги в закладки
+          и удаляет их из закладок.
+        </li>
+
+        <li>
+          Добавляет книги в корзину,
+          изменяет количество экземпляров
+          и удаляет товары.
+        </li>
+
+        <li>
+          Оформляет демонстрационные заказы.
+        </li>
+
+        <li>
+          Создаёт, редактирует и удаляет
+          собственные отзывы.
+        </li>
+      </ul>
+
+      <p>
+        Эти действия изменяют содержимое
+        соответствующих страниц, но не являются
+        настройками отдельного рекомендательного
+        алгоритма.
+      </p>
+
+      <h2 class="recommend-page__heading">
+        5. Хранение данных
+      </h2>
+
+      <p>
+        <strong>5.1.</strong>
+        В текущей учебной реализации для хранения
+        части пользовательских данных применяется
+        механизм localStorage браузера.
+      </p>
+
+      <p>
+        <strong>5.2.</strong>
+        Сохранённые сведения обычно остаются
+        доступными после обновления страницы
+        и повторного открытия сайта
+        в том же браузере.
+      </p>
+
+      <p>
+        <strong>5.3.</strong>
+        При очисткеданных сайта сохранённые
+        закладки, корзина, демонстрационные
+        заказы и отзывы могут быть удалены.
+      </p>
+
+      <p>
+        <strong>5.4.</strong>
+        В текущей реализации отсутствует
+        синхронизация этих данных между
+        разными устройствами и браузерами.
+      </p>
+
+      <h2 class="recommend-page__heading">
+        6. Дальнейшее развитие проекта
+      </h2>
+
+      <p>
+        В дальнейшем в FIREBOOKS может быть
+        реализован отдельный механизм
+        рекомендаций книг с учётом жанров,
+        оценок и пользовательских предпочтений.
+      </p>
+
+      <p>
+        При внедрении такой функциональности
+        описание её работы должно быть обновлено
+        в соответствии с фактическими возможностями
+        сайта и применимыми требованиями
+        законодательства.
+      </p>
+
+      <h2 class="recommend-page__heading">
+        7. Дополнительная информация
+      </h2>
+
+      <p>
+        Эта страница носит информационный характер
+        и описывает учебную реализацию FIREBOOKS.
+        Она не заменяет юридические документы,
+        необходимые для запуска реального
+        интернет-магазина.
+      </p>
+
+      <div class="recommend-page__links">
+        <a href="/">Перейти в каталог →</a>
+        <a href="/library">Моя библиотека →</a>
+        <a href="/bookmarks">Мои закладки →</a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ФУТЕР -->
+<footer class="footer">
+  <div class="container footer__inner">
+
+    <div class="footer__col">
+      <h3 class="footer__heading">О компании</h3>
+      <ul class="footer__list">
+        <li><a href="#">О FIREBOOKS</a></li>
+        <li><a href="#">Политика конфиденциальности</a></li>
+        <li><a href="#">Вакансии</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Покупателям</h3>
+      <ul class="footer__list">
+        <li><a href="#">Программа лояльности</a></li>
+        <li><a href="#">Подарочные сертификаты</a></li>
+        <li><a href="#">Оплата и доставка</a></li>
+        <li><a href="#">Правила возврата</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Контакты</h3>
+      <ul class="footer__list">
+        <li><a href="#">Контакты и реквизиты</a></li>
+        <li><a href="#">Помощь и ответы на вопросы</a></li>
+        <li><a href="#">Обратная связь</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <img
+    src="/static/img/Безымянный-1.png"
+    alt="FIREBOOKS"
+    class="logo__img footer__logo"
+  >
+
+  <div class="container footer__bottom">
+
+    <div class="footer__socials">
+      <a href="#" class="social" aria-label="VK">VK</a>
+      <a href="#" class="social" aria-label="Telegram">TG</a>
+      <a href="#" class="social" aria-label="TikTok">TT</a>
+      <a href="#" class="social" aria-label="YouTube">YT</a>
+    </div>
+
+    <p class="footer__copyright">
+      2024–2026, FIREBOOKS — учебный проект
+
+      <a
+        href="/recommend"
+        class="footer__recommend-link"
+      >
+        Информация о рекомендательных технологиях
+      </a>
+    </p>
+
+  </div>
+</footer>
+
+<script>
+"use strict";
+
+(() => {
+  const userName =
+    localStorage.getItem("firebooks_user_name");
+
+  const nameElement =
+    document.querySelector(".user-name");
+
+  if (nameElement) {
+    nameElement.textContent =
+      userName || "Профиль";
+  }
+})();
+</script>
+
+</body>
+</html>

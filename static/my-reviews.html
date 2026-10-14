@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мои отзывы — FIREBOOKS</title>
+
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/cabinet.css">
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+
+    .reviews__empty {
+      padding: 24px;
+      line-height: 1.7;
+    }
+
+    .reviews__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .reviews__action {
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      color: #222;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .reviews__action:hover {
+      background: #f5f5f5;
+    }
+
+    .reviews__action--delete {
+      color: #b42318;
+      border-color: #f1c5c1;
+    }
+
+    .reviews__date {
+      margin-top: 8px;
+      color: #777;
+      font-size: 13px;
+    }
+
+    .reviews__text {
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+
+    .reviews__modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.55);
+    }
+
+    .reviews__modal-content {
+      position: relative;
+      box-sizing: border-box;
+      width: min(100%, 520px);
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .reviews__modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      border: none;
+      background: transparent;
+      font-size: 28px;
+      cursor: pointer;
+    }
+
+    .reviews__modal-title {
+      margin-bottom: 16px;
+      padding-right: 24px;
+    }
+
+    .reviews__stars {
+      display: flex;
+      gap: 6px;
+      margin: 12px 0 20px;
+    }
+
+    .reviews__star {
+      border: none;
+      background: transparent;
+      color: #bbb;
+      font-size: 32px;
+      cursor: pointer;
+    }
+
+    .reviews__star.active {
+      color: #f5aa24;
+    }
+
+    .reviews__textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 140px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font: inherit;
+      resize: vertical;
+    }
+
+    .reviews__save {
+      margin-top: 16px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #222;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .reviews__book-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ШАПКА -->
+<header class="header">
+  <div class="container header__inner">
+
+    <a href="/" class="logo">
+      <img
+        src="/static/img/Безымянный-1.png"
+        alt="FIREBOOKS"
+        class="logo__img"
+      >
+    </a>
+
+    <nav class="nav">
+      <ul class="nav__list">
+        <li class="nav__item">
+          <a href="/" class="nav__link">Каталог</a>
+        </li>
+
+        <li class="nav__item">
+          <a
+            href="/library"
+            class="nav__link nav__link--active"
+          >
+            Мои книги
+          </a>
+        </li>
+
+        <li class="nav__item">
+          <a href="/cart" class="nav__link">Корзина</a>
+        </li>
+
+        <li class="nav__item">
+          <a href="/orders" class="nav__link">Заказы</a>
+        </li>
+
+        <li class="nav__item user-dropdown">
+          <a
+            href="/profile"
+            class="nav__link nav__link--user"
+            id="user-menu"
+          >
+            <span class="user-name">Профиль</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <form
+      class="search"
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <input
+        type="search"
+        name="q"
+        class="search__input"
+        placeholder="Поиск книг..."
+        aria-label="Поиск книг"
+      ><button
+        type="submit"
+        class="search__btn"
+        aria-label="Найти"
+      >
+        ⌕
+      </button>
+    </form>
+
+  </div>
+</header>
+
+<!-- ЛИЧНЫЙ КАБИНЕТ -->
+<main class="cabinet">
+  <div class="cabinet__wrapper">
+
+    <!-- САЙДБАР -->
+    <aside class="sidebar">
+
+      <div class="sidebar__user">
+        <div
+          class="sidebar__avatar"
+          id="sidebar-avatar"
+        >?</div>
+
+        <span
+          class="sidebar__name"
+          id="sidebar-name"
+        >
+          Пользователь
+        </span>
+      </div>
+
+      <nav class="sidebar__nav">
+
+        <!-- БИБЛИОТЕКА -->
+        <a href="/library" class="sidebar__item">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+          </svg>
+
+          <span class="sidebar__label">Библиотека</span>
+          <span
+            class="sidebar__badge"
+            id="library-count"
+          >0</span>
+        </a>
+
+        <!-- ЗАКЛАДКИ -->
+        <a href="/bookmarks" class="sidebar__item">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+          </svg>
+
+          <span class="sidebar__label">Закладки</span>
+          <span
+            class="sidebar__badge"
+            id="bookmarks-count"
+          >0</span>
+        </a>
+
+        <!-- МОИ ОТЗЫВЫ -->
+        <a
+          href="/my-reviews"
+          class="sidebar__item sidebar__item--active"
+          aria-current="page"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+
+          <span class="sidebar__label">Мои отзывы</span>
+          <span
+            class="sidebar__badge"
+            id="reviews-count"
+          >0</span>
+        </a>
+
+      </nav>
+
+      <div class="sidebar__bottom">
+        <a href="/" class="sidebar__bottom-link">Каталог</a>
+        <a href="/cart" class="sidebar__bottom-link">Корзина</a>
+        <a href="/orders" class="sidebar__bottom-link">Заказы</a>
+      </div>
+
+    </aside>
+
+    <!-- СОДЕРЖИМОЕ -->
+    <div class="cabinet__content">
+      <h1 class="cabinet__title">Мои отзывы</h1>
+
+      <p id="reviews-empty" class="reviews__empty" hidden>
+        Вы пока не написали ни одного отзыва.
+        <a href="/library">
+          Перейти в библиотеку →
+        </a>
+      </p>
+
+      <div
+        class="cabinet__grid"
+        id="reviews-grid"
+      ></div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ФУТЕР -->
+<footer class="footer">
+  <div class="container footer__inner">
+
+    <div class="footer__col">
+      <h3 class="footer__heading">О компании</h3>
+      <ul class="footer__list">
+        <li><a href="#">О FIREBOOKS</a></li>
+        <li><a href="#">Политика конфиденциальности</a></li>
+        <li><a href="#">Вакансии</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Покупателям</h3>
+      <ul class="footer__list">
+        <li><a href="#">Программа лояльности</a></li>
+        <li><a href="#">Подарочные сертификаты</a></li>
+        <li><a href="#">Оплата и доставка</a></li>
+        <li><a href="#">Правила возврата</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Контакты</h3>
+      <ul class="footer__list">
+        <li><a href="#">Контакты и реквизиты</a></li>
+        <li><a href="#">Помощь и ответы на вопросы</a></li>
+        <li><a href="#">Обратная связь</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <img
+    src="/static/img/Безымянный-1.png"
+    alt="FIREBOOKS"
+    class="logo__img footer__logo"
+  >
+
+  <div class="container footer__bottom">
+    <div class="footer__socials">
+      <a href="#" class="social" aria-label="VK">VK</a>
+      <a href="#" class="social" aria-label="Telegram">TG</a>
+      <a href="#" class="social" aria-label="TikTok">TT</a>
+    </div>
+
+    <p class="footer__copyright">
+      2024–2026, ООО «ГРАМОТА»
+
+      <a
+        href="/recommend"
+        class="footer__recommend-link"
+      >
+        На информационном ресурсе применяются
+        рекомендательные технологии
+      </a>
+    </p>
+  </div>
+</footer>
+
+<!-- ОКНО РЕДАКТИРОВАНИЯ -->
+<div
+  class="reviews__modal"
+  id="edit-modal"
+  hidden
+>
+  <div
+    class="reviews__modal-content"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="edit-heading"
+  >
+
+    <button
+      type="button"
+      class="reviews__modal-close"
+      id="edit-close"
+      aria-label="Закрыть"
+    >
+      ×
+    </button>
+
+    <h2
+      id="edit-heading"
+      class="reviews__modal-title"
+    >
+      Редактировать отзыв
+    </h2>
+
+    <p id="edit-book-title"></p>
+
+    <form id="edit-form">
+      <p>Ваша оценка</p>
+
+      <div class="reviews__stars">
+        <button
+          type="button"
+          class="reviews__star"
+          data-rating="1"
+          aria-label="1 звезда"
+        >★</button>
+
+        <button
+          type="button"
+          class="reviews__star"
+          data-rating="2"
+          aria-label="2 звезды"
+        >★</button>
+
+        <button
+          type="button"
+          class="reviews__star"
+          data-rating="3"
+          aria-label="3 звезды"
+        >★</button>
+
+        <button
+          type="button"
+          class="reviews__star"
+          data-rating="4"
+          aria-label="4 звезды"
+        >★</button>
+
+        <button
+          type="button"
+          class="reviews__star"
+          data-rating="5"
+          aria-label="5 звёзд"
+        >★</button>
+      </div>
+
+      <label for="edit-text">Текст отзыва</label>
+
+      <textarea
+        id="edit-text"
+        class="reviews__textarea"
+        required
+        minlength="5"
+        maxlength="3000"
+      ></textarea>
+
+      <button
+        type="submit"
+        class="reviews__save"
+      >
+        Сохранить изменения
+      </button>
+    </form>
+
+  </div>
+</div>
+
+<script>
+"use strict";
+
+(() => {
+  const REVIEWS_KEY = "firebooks_reviews";
+  const FAVORITES_KEY = "firebooks_favorites";
+  const ORDERS_KEY = "firebooks_orders";
+
+  const grid = document.getElementById("reviews-grid");
+  const empty = document.getElementById("reviews-empty");
+  const modal = document.getElementById("edit-modal");
+
+  let editingIndex = -1;
+  let selectedRating = 0;
+
+  function readArray(key) {
+    try {
+      const data = JSON.parse(
+        localStorage.getItem(key) || "[]"
+      );
+
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveArray(key, data) {
+    localStorage.setItem(
+      key,
+      JSON.stringify(data)
+    );
+  }
+
+  function make(tag, className, text) {
+    const element = document.createElement(tag);
+
+    if (className) element.className = className;
+
+    if (text !== undefined) {
+      element.textContent = text;
+    }
+
+    return element;
+  }
+
+  function bookId(item) {
+    if (item && typeof item === "object") {
+      return String(item.id ?? "").trim();
+    }
+
+    return String(item ?? "").trim();
+  }
+
+  function reviewBookId(review) {
+    return String(
+      review.bookId ??
+      review.book_id ??
+      review.id ??
+      ""
+    ).trim();
+  }
+
+  function getReviews() {
+    return readArray(REVIEWS_KEY);
+  }
+
+  function getPurchasedCount() {
+    const ids = new Set();
+
+    readArray(ORDERS_KEY).forEach(order => {
+      if (!order || !Array.isArray(order.items)) {
+        return;
+      }
+
+      order.items.forEach(item => {
+        if (!item || !item.title) return;
+
+        const id = bookId(item);
+
+        ids.add(
+          id || "title:" + String(item.title)
+        );
+      });
+    });
+
+    return ids.size;
+  }
+
+  function getFavoritesCount() {
+    return new Set(
+      readArray(FAVORITES_KEY)
+        .map(bookId)
+        .filter(Boolean)
+    ).size;
+  }
+
+  function updateProfile() {
+    const name =
+      localStorage.getItem("firebooks_user_name") ||
+      "Пользователь";
+
+    document.querySelector(".user-name").textContent =
+      name;
+
+    document.getElementById("sidebar-name").textContent =
+      name;
+
+    document.getElementById("sidebar-avatar").textContent =
+      name.charAt(0).toUpperCase();
+  }
+
+  function updateCounters() {
+    document.getElementById("library-count").textContent =
+      getPurchasedCount();
+
+    document.getElementById("bookmarks-count").textContent =
+      getFavoritesCount();
+
+    document.getElementById("reviews-count").textContent =
+      getReviews().length;
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+
+    return date.toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+  }
+
+  function getReviewTitle(review) {
+    return String(
+      review.bookTitle ||
+      review.title ||
+      "Книга"
+    );
+  }
+
+  function getReviewAuthor(review) {
+    return String(
+      review.author ||
+      review.bookAuthor ||
+      ""
+    );
+  }
+
+  function getReviewCover(review) {
+    return String(
+      review.cover ||
+      review.cover_url ||
+      ""
+    );
+  }
+
+  function getReviewText(review) {
+    return String(
+      review.text ||
+      review.review ||
+      ""
+    );
+  }
+
+  function getReviewRating(review) {
+    return Math.max(
+      0,
+      Math.min(5, Number(review.rating) || 0)
+    );
+  }
+
+  function createReviewCard(review, index) {
+    const wrapper = make(
+      "article",
+      "cabinet__card"
+    );
+
+    // КАРТОЧКА КНИГИ
+    const bookCard = make("div", "book-card");
+    const cover = make("div", "book-card__cover");
+
+    const id = reviewBookId(review);
+
+    const bookLink = make(
+      "a",
+      "reviews__book-link"
+    );
+
+    bookLink.href = id
+      ? "/book?id=" + encodeURIComponent(id)
+      : "#";
+
+    const image = make("img");
+
+    image.src = getReviewCover(review);
+    image.alt = getReviewTitle(review);
+    image.loading = "lazy";
+
+    bookLink.appendChild(image);
+    cover.appendChild(bookLink);
+
+    const info = make("div", "book-card__info");
+
+    const title = make(
+      "a",
+      "book-card__title",
+      getReviewTitle(review)
+    );
+
+    title.href = bookLink.href;
+
+    const author = make(
+      "p",
+      "book-card__author",
+      getReviewAuthor(review)
+    );
+
+    info.append(title, author);
+    bookCard.append(cover, info);
+
+    wrapper.appendChild(bookCard);
+
+    // БЛОК ОТЗЫВА
+    const reviewBlock = make(
+      "div",
+      "review-block"
+    );
+
+    const header = make(
+      "div",
+      "review-block__header"
+    );
+
+    const name =
+      localStorage.getItem("firebooks_user_name") ||
+      "Пользователь";
+
+    const avatar = make(
+      "div",
+      "review-block__avatar",
+      name.charAt(0).toUpperCase()
+    );
+
+    const authorName = make(
+      "span",
+      "review-block__author",
+      name
+    );
+
+    header.append(avatar, authorName);
+
+    const ratingRow = make(
+      "div",
+      "review-block__rating"
+    );
+
+    const rating = getReviewRating(review);
+
+    for (let i = 1; i <= 5; i++) {
+      ratingRow.appendChild(
+        make(
+          "span",
+          i <= rating ? "star filled" : "star",
+          "★"
+        )
+      );
+    }
+
+    const text = make(
+      "p",
+      "review-block__text reviews__text",
+      getReviewText(review)
+    );
+
+    const date = make(
+      "p",
+      "reviews__date",
+      formatDate(
+        review.updatedAt || review.createdAt
+      )
+    );
+
+    const actions = make(
+      "div",
+      "reviews__actions"
+    );
+
+    const editButton = make(
+      "button",
+      "reviews__action",
+      "Редактировать"
+    );
+
+    editButton.type = "button";
+
+    editButton.addEventListener("click", () => {
+      openEditModal(index);
+    });
+
+    const deleteButton = make(
+      "button",
+      "reviews__action reviews__action--delete",
+      "Удалить"
+    );
+
+    deleteButton.type = "button";
+
+    deleteButton.addEventListener("click", () => {
+      deleteReview(index);
+    });
+
+    actions.append(editButton, deleteButton);
+
+    reviewBlock.append(
+      header,
+      ratingRow,
+      text,
+      date,
+      actions
+    );
+
+    wrapper.appendChild(reviewBlock);
+
+    return wrapper;
+  }
+
+  function renderReviews() {
+    const reviews = getReviews();
+
+    grid.replaceChildren();
+
+    const validReviews = reviews
+      .map((review, index) => ({ review, index }))
+      .filter(entry =>
+        entry.review &&
+        typeof entry.review === "object"
+      );
+
+    empty.hidden = validReviews.length > 0;
+
+    validReviews.forEach(({ review, index }) => {
+      grid.appendChild(
+        createReviewCard(review, index)
+      );
+    });
+  }
+
+  function updateStars() {
+    document.querySelectorAll(
+      ".reviews__star"
+    ).forEach(button => {
+      const value = Number(
+        button.dataset.rating
+      );
+
+      button.classList.toggle(
+        "active",
+        value <= selectedRating
+      );
+
+      button.setAttribute(
+        "aria-pressed",
+        String(value === selectedRating)
+      );
+    });
+  }
+
+  function openEditModal(index) {
+    const reviews = getReviews();
+    const review = reviews[index];
+
+    if (!review) return;
+
+    editingIndex = index;
+    selectedRating = getReviewRating(review);
+
+    document.getElementById(
+      "edit-book-title"
+    ).textContent = getReviewTitle(review);
+
+    document.getElementById(
+      "edit-text"
+    ).value = getReviewText(review);
+
+    updateStars();
+
+    modal.hidden = false;
+
+    document.getElementById(
+      "edit-text"
+    ).focus();
+  }
+
+  function closeEditModal() {
+    modal.hidden = true;
+    editingIndex = -1;
+    selectedRating = 0;
+  }
+
+  function deleteReview(index) {
+    const reviews = getReviews();
+    const review = reviews[index];
+
+    if (!review) return;
+
+    const title = getReviewTitle(review);
+
+    if (!confirm(
+      'Удалить ваш отзыв о книге "' + title + '"?'
+    )) {
+      return;
+    }
+
+    reviews.splice(index, 1);
+
+    try {
+      saveArray(REVIEWS_KEY, reviews);
+    } catch (error) {
+      console.error(error);
+      alert("Не удалось удалить отзыв.");
+      return;
+    }
+
+    updateCounters();
+    renderReviews();
+  }
+
+  document.querySelectorAll(
+    ".reviews__star"
+  ).forEach(button => {
+    button.addEventListener("click", () => {
+      selectedRating = Number(
+        button.dataset.rating
+      );
+
+      updateStars();
+    });
+  });
+
+  document.getElementById(
+    "edit-close"
+  ).addEventListener(
+    "click",
+    closeEditModal
+  );
+
+  modal.addEventListener("click", event => {
+    if (event.target === modal) {
+      closeEditModal();
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (
+      event.key === "Escape" &&
+      !modal.hidden
+    ) {
+      closeEditModal();
+    }
+  });
+
+  document.getElementById(
+    "edit-form"
+  ).addEventListener("submit", event => {
+    event.preventDefault();
+
+    if (editingIndex < 0) return;
+
+    if (
+      selectedRating < 1 ||
+      selectedRating > 5
+    ) {
+      alert("Выберите оценку от 1 до 5.");
+      return;
+    }
+
+    const text = document.getElementById(
+      "edit-text"
+    ).value.trim();
+
+    if (text.length < 5) {
+      alert(
+        "Отзыв должен содержать хотя бы 5 символов."
+      );
+      return;
+    }
+
+    const reviews = getReviews();
+
+    if (!reviews[editingIndex]) return;
+
+    reviews[editingIndex] = {
+      ...reviews[editingIndex],
+      rating: selectedRating,
+      text: text,
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      saveArray(REVIEWS_KEY, reviews);
+    }catch (error) {
+      console.error(error);
+      alert("Не удалось сохранить изменения.");
+      return;
+    }
+
+    closeEditModal();
+    updateCounters();
+    renderReviews();
+  });
+
+  window.addEventListener("storage", event => {
+    if (
+      event.key === REVIEWS_KEY ||
+      event.key === FAVORITES_KEY ||
+      event.key === ORDERS_KEY
+    ) {
+      updateCounters();
+      renderReviews();
+    }
+  });
+
+  updateProfile();
+  updateCounters();
+  renderReviews();
+})();
+</script>
+
+</body>
+</html>

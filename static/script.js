@@ -1,0 +1,1197 @@
+"use strict";
+
+const API = "/api";
+const sectionState = {};
+const USER_KEY = "firebooks_user_name";
+
+function formatPrice(value) {
+  const number = Number(String(value ?? 0).replace(/[^\d.,]/g, "").replace(",", "."));
+  return (Number.isFinite(number) ? number : 0).toLocaleString("ru-RU") + " р.";
+}
+
+function priceNumber(value) {
+  return Number(String(value ?? 0).replace(/[^\d]/g, "")) || 0;
+}
+
+function starsHTML(rating) {
+  const value = Math.max(0, Math.min(5, Number(rating) || 0));
+  return Array.from({ length: 5 }, (_, index) =>
+    `<span class="star${index < value ? " filled" : ""}">★</span>`
+  ).join("");
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "'"
+  }[character]));
+}
+
+function readStorage(key, fallback = []) {
+  try {
+    const result = JSON.parse(localStorage.getItem(key) || "null");
+    return result ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStorage(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function skeletonCards(container, count = 5) {
+  if (!container) return;
+  container.replaceChildren();
+
+  for (let i = 0; i < count; i++) {
+    const card = document.createElement("div");
+    card.className = "skeleton-card";
+    card.innerHTML = `
+      <div class="skeleton-cover"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+    `;
+    container.appendChild(card);
+  }
+}
+
+function bookCardHTML(book) {
+  const id = Number(book.id) || 0;
+  const title = escapeHTML(book.full_title || book.title);
+  const author = escapeHTML(book.author);
+  const cover = escapeHTML(book.cover_url);
+  const type = escapeHTML(book.cover_type);
+  const status = "В корзину";
+  const discount = Number(book.discount) || 0;
+
+  return `
+    <div class="book-card" data-id="${id}">
+      <div class="book-card__cover">
+        <img src="${cover}" alt="${title}" loading="lazy">
+        ${discount > 0
+          ? `<span class="book-card__discount">-${discount}%</span>`
+          : ""}
+        <button type="button" class="book-card__fav"
+                aria-label="Добавить в избранное"
+                aria-pressed="false">♥</button>
+      </div>
+      <div class="book-card__info">
+        <p class="book-card__type">${type}</p>
+        <div class="book-card__prices">
+          <span class="book-card__old-price">${formatPrice(book.old_price)}</span>
+          <span class="book-card__new-price">${formatPrice(book.new_price)}</span>
+        </div>
+        <p class="book-card__title">${title}</p>
+        <p class="book-card__author">${author}</p>
+        <div class="book-card__rating">${starsHTML(book.rating)}</div>
+        <button type="button" class="book-card__btn">${status}</button>
+      </div>
+    </div>
+  `;
+}
+
+async function loadSection(endpoint, gridId, count = 5) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+
+  skeletonCards(grid, count);
+
+  try {
+    const response = await fetch(`${API}${endpoint}`);
+    if (!response.ok) {
+      throw new Error(`Ошибка API: ${response.status}`);
+    }
+
+    const books = await response.json();
+    if (!Array.isArray(books)) {
+      throw new Error("Неверный формат списка книг");
+    }
+
+    sectionState[gridId] = {
+      books,
+      shown: Math.min(count, books.length),
+      step: count
+    };
+
+    grid.innerHTML = books.slice(0, count).map(bookCardHTML).join("");
+    syncFavoriteButtons(grid);
+
+    if (books.length > count) {
+      addViewAllButton(gridId);
+    }
+  } catch (error) {
+    grid.innerHTML = "";
+    const message = document.createElement("p");
+    message.textContent = "Не удалось загрузить книги";
+    message.style.gridColumn = "1 / -1";
+    message.style.color = "#999";
+    grid.appendChild(message);
+    console.error("Ошибка загрузки книг:", error);
+  }
+}
+
+function addViewAllButton(gridId) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+
+  const buttonId = `viewall-${gridId}`;
+  if (document.getElementById(buttonId)) return;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.id = buttonId;
+  button.className = "view-all-btn";
+  button.textContent = "Смотреть все";
+  button.addEventListener("click", () => loadMore(gridId));
+
+  grid.parentElement.appendChild(button);
+}
+
+function loadMore(gridId) {
+  const state = sectionState[gridId];
+  const grid = document.getElementById(gridId);
+  if (!state || !grid) return;
+
+  const start = state.shown;
+  const end = Math.min(start + state.step, state.books.length);
+
+  grid.insertAdjacentHTML(
+    "beforeend",
+    state.books.slice(start, end).map(bookCardHTML).join("")
+  );
+
+  state.shown = end;
+  syncFavoriteButtons(grid);
+
+  if (end >= state.books.length) {
+    const button = document.getElementById(`viewall-${gridId}`);
+    if (button) button.remove();
+  }
+}
+
+async function loadHero() {
+  if (!document.getElementById("hero-title")) return;
+
+  try {
+    const response = await fetch(`${API}/hero`);
+    if (!response.ok) {
+      throw new Error(`Ошибка API: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    const description = document.getElementById("hero-desc");
+    const title = document.getElementById("hero-title");
+    const author = document.getElementById("hero-author");
+    const cover = document.getElementById("hero-cover");
+
+    if (description) description.textContent = data.description || "";
+    if (title) title.textContent = data.title || "";
+    if (author) author.textContent = data.author || "";
+
+    if (cover && data.cover_url) {
+      cover.src = data.cover_url;
+      cover.alt = data.title || "Обложка книги";
+    }
+  } catch (error) {
+    console.error("Ошибка загрузки баннера:", error);
+  }
+}
+
+// ─── Пользователь ───────────────────────────────────────────
+
+function getUserName() {
+  return localStorage.getItem(USER_KEY) || null;
+}
+
+function getUserSurname() {
+  return localStorage.getItem("firebooks_user_surname") || null;
+}
+
+function getUserPhone() {
+  return localStorage.getItem("firebooks_user_phone") || null;
+}
+
+function getUserEmail() {
+  return localStorage.getItem("firebooks_user_email") || null;
+}
+
+function isLoggedIn() {
+  return Boolean(getUserName());
+}
+
+function updateUserName() {
+  const name = getUserName();
+  const trigger =
+    document.getElementById("user-menu") ||
+    document.getElementById("login-trigger");
+
+  if (trigger) {
+    if (name) {
+      trigger.id = "user-menu";
+      trigger.href = "/profile";
+      trigger.classList.remove("nav__link--login");
+      trigger.classList.add("nav__link--user");
+
+      trigger.replaceChildren();
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "user-name";
+      nameSpan.textContent = name;
+
+      trigger.appendChild(nameSpan);
+    } else {
+      trigger.id = "login-trigger";
+      trigger.href = "#";
+      trigger.textContent = "Войти";
+      trigger.classList.remove("nav__link--user", "user-dropdown");
+      trigger.classList.add("nav__link--login");
+    }
+  }
+
+  document.querySelectorAll(".sidebar__name").forEach(element => {
+    element.textContent = name || "Гость";
+  });
+
+  document.querySelectorAll(".sidebar__avatar").forEach(element => {
+    element.textContent = (name || "Г").charAt(0).toUpperCase();
+  });
+
+  document.querySelectorAll(".user-name").forEach(element => {
+    element.textContent = name || "Войти";
+  });
+}
+
+function fillProfileData() {
+  const name = getUserName();
+  const surname = getUserSurname();
+  const email = getUserEmail();
+  const phone = getUserPhone();
+
+  const fields = {
+    "profile-name": name || "Гость",
+    "profile-surname": surname || "",
+    "profile-email": email || "—",
+    "profile-phone": phone || "—",
+    "profile-avatar-letter": (name || "Г").charAt(0).toUpperCase()
+  };
+
+  Object.entries(fields).forEach(([id, value]) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+  });
+
+  const surnameRow = document.getElementById("profile-surname-item");
+  if (surnameRow) surnameRow.style.display = surname ? "" : "none";
+}
+
+function logout() {
+  [
+    "firebooks_user_name",
+    "firebooks_user_surname",
+    "firebooks_user_phone",
+    "firebooks_user_email"
+  ].forEach(key => localStorage.removeItem(key));
+
+  updateUserName();
+  fillProfileData();
+
+  window.location.href = "/";
+}
+
+// ─── Модальные окна авторизации ──────────────────────────────
+
+function openModal(modal) {
+  if (!modal) return;
+  modal.classList.add("modal--open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(modal) {
+  if (!modal) return;
+  modal.classList.remove("modal--open");
+
+  if (!document.querySelector(".modal.modal--open")) {
+    document.body.style.overflow = "";
+  }
+}
+
+function initAuthentication() {
+  const loginModal = document.getElementById("login-modal");
+  const registerModal = document.getElementById("register-modal");
+
+  document.addEventListener("click", event => {
+    const loginLink = event.target.closest("#login-trigger");
+    if (loginLink) {
+      event.preventDefault();
+
+      if (isLoggedIn()) {
+        window.location.href = "/profile";
+      } else {
+        openModal(loginModal);
+      }
+      return;
+    }
+
+    const userLink = event.target.closest("#user-menu");
+    if (userLink) {
+      event.preventDefault();
+      window.location.href = "/profile";
+      return;
+    }
+
+    if (event.target.closest(".modal__register-link")) {
+      event.preventDefault();
+      closeModal(loginModal);
+      openModal(registerModal);
+      return;
+    }
+
+    if (event.target.closest(".modal__login-link")) {
+      event.preventDefault();
+      closeModal(registerModal);
+      openModal(loginModal);
+      return;
+    }
+
+    if (event.target.closest("#modal-close")) {
+      closeModal(loginModal);
+      return;
+    }
+
+    if (event.target.closest("#register-close")) {
+      closeModal(registerModal);
+    }
+  });
+
+  [loginModal, registerModal].forEach(modal => {
+    if (!modal) return;
+
+    modal.addEventListener("click", event => {
+      if (event.target === modal) closeModal(modal);
+    });
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeModal(loginModal);
+      closeModal(registerModal);
+    }
+  });
+
+  const loginForm = document.getElementById("login-form");
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const email = document.getElementById("login-email")?.value.trim();
+      if (!email) return;
+
+      // Демонстрационный вход. Проверка пароля требует серверного API.
+      const existingEmail = getUserEmail();
+      const existingName = getUserName();
+
+      const name =
+        existingName && existingEmail === email
+          ? existingName
+          : email.split("@")[0];
+
+      localStorage.setItem("firebooks_user_name", name);
+      localStorage.setItem("firebooks_user_email", email);
+
+      updateUserName();
+      fillProfileData();
+      closeModal(loginModal);
+      loginForm.reset();
+    });
+  }
+
+  const registerForm = document.getElementById("register-form");
+
+  if (registerForm) {
+    registerForm.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const name = document.getElementById("reg-name")?.value.trim();
+      const surname = document.getElementById("reg-surname")?.value.trim();
+      const phone = document.getElementById("reg-phone")?.value.trim();
+      const email = document.getElementById("reg-email")?.value.trim();
+
+      if (!name || !email || !phone) return;
+
+      localStorage.setItem("firebooks_user_name", name);
+      localStorage.setItem("firebooks_user_email", email);
+      localStorage.setItem("firebooks_user_phone", phone);
+
+      if (surname) {
+        localStorage.setItem("firebooks_user_surname", surname);
+      } else {
+        localStorage.removeItem("firebooks_user_surname");
+      }
+
+      updateUserName();
+      fillProfileData();
+      closeModal(registerModal);
+      registerForm.reset();
+    });
+  }
+
+  document.getElementById("logout-btn")?.addEventListener("click", logout);
+}
+
+// ─── Избранное: SQLite ───────────────────────────────────────
+
+const favoriteIds = new Set();
+let favoritesLoaded = false;
+let favoritesRequestVersion = 0;
+
+function getFavorites() {
+  return [...favoriteIds];
+}
+
+function favoriteId(card) {
+  return card?.dataset.id || "";
+}
+
+function extractFavoriteIds(data) {
+  const items = Array.isArray(data)
+    ? data
+    : data?.favorites ?? data?.books ?? [];
+
+  if (!Array.isArray(items)) {
+    throw new Error("Неожиданный формат ответа избранного");
+  }
+
+  return items
+    .map(item => {
+      if (item && typeof item === "object") {
+        return item.book_id ?? item.id ?? item.book?.id;
+      }
+      return item;
+    })
+    .filter(id => id !== null && id !== undefined)
+    .map(String);
+}
+
+function syncFavoriteButtons(root = document) {
+  root.querySelectorAll(".book-card__fav").forEach(button => {
+    const card = button.closest(".book-card");
+    const id = favoriteId(card);
+    if (!id) return;
+
+    const active = favoriteIds.has(String(id));
+
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+    button.setAttribute(
+      "aria-label",
+      active ? "Удалить из избранного" : "Добавить в избранное"
+    );
+  });
+}
+
+async function loadFavorites() {
+  const version = ++favoritesRequestVersion;
+
+  try {
+    const response = await fetch("/api/favorites", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+
+    if (version !== favoritesRequestVersion) return;
+
+    if (response.status === 401) {
+      favoriteIds.clear();
+      favoritesLoaded = true;
+      syncFavoriteButtons();
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error("Ошибка загрузки закладок: " + response.status);
+    }
+
+    const data = await response.json();
+
+    if (version !== favoritesRequestVersion) return;
+
+    favoriteIds.clear();
+
+    extractFavoriteIds(data).forEach(id => {
+      favoriteIds.add(id);
+    });
+
+    favoritesLoaded = true;
+    syncFavoriteButtons();
+  } catch (error) {
+    if (version !== favoritesRequestVersion) return;
+
+    favoritesLoaded = false;
+    console.error("Не удалось загрузить избранное:", error);
+  }
+}
+
+async function toggleFavorite(button) {
+  const card = button.closest(".book-card");
+  const id = favoriteId(card);
+
+  if (!id || button.disabled) return;
+
+  if (!favoritesLoaded) {
+    alert("Закладки ещё загружаются. Попробуйте через секунду.");
+    return;
+  }
+
+  const wasFavorite = favoriteIds.has(String(id));
+
+  button.disabled = true;
+
+  try {
+    const response = await fetch(
+      "/api/favorites/" + encodeURIComponent(id),
+      {
+        method: wasFavorite ? "DELETE" : "PUT",
+        credentials: "same-origin"
+      }
+    );
+
+    if (response.status === 401) {
+      alert("Чтобы сохранять книги, войдите в аккаунт.");
+      await loadFavorites();
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error("Ошибка сохранения закладки: " + response.status);
+    }
+
+    if (wasFavorite) {
+      favoriteIds.delete(String(id));
+    } else {
+      favoriteIds.add(String(id));
+    }
+
+    // Синхронизируем все карточки одной книги на странице.
+    syncFavoriteButtons();
+
+    window.dispatchEvent(new CustomEvent("firebooks:favorites-changed"));
+  } catch (error) {
+    console.error("Не удалось изменить закладку:", error);
+    alert("Не удалось сохранить закладку. Попробуйте ещё раз.");
+  } finally {
+    button.disabled = false;
+  }
+}
+
+// После входа или выхода загружаем закладки нового пользователя.
+window.addEventListener("firebooks:auth-changed", () => {
+  favoritesLoaded = false;
+  favoriteIds.clear();
+  syncFavoriteButtons();
+  loadFavorites();
+});
+
+// ─── Покупка и карточки книг ─────────────────────────────────
+
+function itemFromBookCard(card) {
+  const cover = card.querySelector(".book-card__cover img");
+  const title = card.querySelector(".book-card__title");
+  const author = card.querySelector(".book-card__author");
+  const price = card.querySelector(".book-card__new-price");
+
+  const amount = priceNumber(price?.textContent);
+
+  return {
+    id: Number(card.dataset.id) || null,
+    cover: cover?.getAttribute("src") || "",
+    title: title?.textContent.trim() || "",
+    author: author?.textContent.trim() || "",
+    price: amount,
+    priceText: formatPrice(amount),
+    quantity: 1
+  };
+}
+
+async function buyBook(card) {
+  const bookId = Number(card?.dataset.id);
+  const button = card?.querySelector(".book-card__btn");
+
+  if (!Number.isInteger(bookId) || bookId <= 0) {
+    alert("Не удалось определить книгу.");
+    return;
+  }
+
+  if (button?.disabled) return;
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Добавляем...";
+  }
+
+  try {
+    const response = await fetch("/api/cart", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        book_id: bookId,
+        quantity: 1
+      })
+    });
+
+    if (response.status === 401) {
+      alert("Чтобы добавить книгу в корзину, войдите в аккаунт.");
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error("Ошибка добавления: " + response.status);
+    }
+
+    if (button) {
+      button.textContent = "Добавлено ✓";
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("firebooks:cart-changed")
+    );
+
+  } catch (error) {
+    console.error("Ошибка корзины:", error);
+    alert("Не удалось добавить книгу в корзину.");
+
+  } finally {
+    if (button) {
+      setTimeout(() => {
+        button.disabled = false;
+        button.textContent = "В корзину";
+      }, 1000);
+    }
+  }
+}
+
+function initBookCardClicks() {
+  document.addEventListener("click", event => {
+    const favoriteButton = event.target.closest(".book-card__fav");
+
+    if (favoriteButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleFavorite(favoriteButton);
+      return;
+    }
+
+    const buyButton = event.target.closest(".book-card__btn");
+
+    if (buyButton) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const card = buyButton.closest(".book-card");
+      if (card) buyBook(card);
+      return;
+    }
+
+    const card = event.target.closest(".book-card");
+
+    if (card && card.dataset.id) {
+      if (event.target.closest("a, button, input, textarea, select")) {
+        return;
+      }
+
+      window.location.href =
+        `/book?id=${encodeURIComponent(card.dataset.id)}`;
+    }
+  });
+}
+
+// ─── «Читать больше» ─────────────────────────────────────────
+
+function initToggleButtons() {
+  document.querySelectorAll(".review-block__toggle").forEach(button => {
+    if (button.dataset.toggleReady === "true") return;
+
+    const text = button.previousElementSibling;
+    if (!text) return;
+
+    button.dataset.toggleReady = "true";
+
+    const clampClass = "review-block__text--clamped";
+
+    if (text.classList.contains(clampClass)) {
+      if (text.scrollHeight <= text.clientHeight + 2) {
+        button.style.display = "none";
+      }
+    }
+
+    button.addEventListener("click", () => {
+      const collapsed = text.classList.toggle(clampClass);
+      button.textContent = collapsed ? "Читать больше" : "Свернуть";
+    });
+  });
+
+  const description = document.getElementById("book-desc-text");
+
+  if (description && !description.dataset.descriptionReady) {
+    description.dataset.descriptionReady = "true";
+    description.classList.add("clamped");
+  }
+}
+
+// ─── Звёзды оценок ───────────────────────────────────────────
+
+function setupStars(container, onSelect = null) {
+  if (!container || container.dataset.starsReady === "true") return;
+
+  container.dataset.starsReady = "true";
+
+  const stars = Array.from(container.querySelectorAll(".review-star"));
+  let selected = 0;
+
+  function paint(value) {
+    stars.forEach(star => {
+      star.classList.toggle(
+        "filled",
+        Number(star.dataset.value) <= value
+      );
+    });
+  }
+
+  stars.forEach(star => {
+    star.addEventListener("mouseenter", () => {
+      paint(Number(star.dataset.value));
+    });
+
+    star.addEventListener("click", () => {
+      selected = Number(star.dataset.value);
+      paint(selected);
+      if (onSelect) onSelect(selected);
+    });
+  });
+
+  container.addEventListener("mouseleave", () => paint(selected));
+
+  container.setRating = value => {
+    selected = Number(value) || 0;
+    paint(selected);
+  };
+
+  container.getRating = () => selected;
+}
+
+function initReviewPrompts() {
+  document.querySelectorAll(".review-prompt__stars").forEach(container => {
+    setupStars(container);
+  });
+}
+
+// ─── Модальное окно отзыва ───────────────────────────────────
+
+function initReviewModal() {
+  const modal = document.getElementById("review-modal");
+  const form = document.getElementById("review-form");
+  const closeButton = document.getElementById("review-close");
+  const success = document.getElementById("review-success");
+  const starsContainer = modal?.querySelector(".review-modal__stars");
+
+  if (!modal) return;
+
+  setupStars(starsContainer);
+
+  let currentBook = null;
+
+  document.querySelectorAll(".review-prompt__btn").forEach(button => {
+    button.addEventListener("click", () => {
+      const card = button.closest(".cabinet__card");
+      if (!card) return;
+
+      const cover = card.querySelector(".book-card__cover img");
+      const title = card.querySelector(".book-card__title");
+      const author = card.querySelector(".book-card__author");
+      const promptStars = card.querySelector(".review-prompt__stars");
+
+      currentBook = {
+        title: title?.textContent.trim() || "",
+        author: author?.textContent.trim() || "",
+        cover: cover?.getAttribute("src") || ""
+      };
+
+      const modalCover = document.getElementById("review-modal-cover");
+      const modalTitle = document.getElementById("review-modal-title");
+      const modalAuthor = document.getElementById("review-modal-author");
+
+      if (modalCover) {
+        modalCover.src = currentBook.cover;
+        modalCover.alt = currentBook.title;
+      }
+
+      if (modalTitle) modalTitle.textContent = currentBook.title;
+      if (modalAuthor) modalAuthor.textContent = currentBook.author;
+
+      form?.reset();
+
+      if (form) form.style.display = "";
+      if (success) success.style.display = "none";
+
+      starsContainer?.setRating?.(promptStars?.getRating?.() || 0);
+      openModal(modal);
+    });
+  });
+
+  closeButton?.addEventListener("click", () => closeModal(modal));
+
+  modal.addEventListener("click", event => {
+    if (event.target === modal) closeModal(modal);
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeModal(modal);
+  });
+
+  form?.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const rating = starsContainer?.getRating?.() || 0;
+
+    if (!rating) {
+      alert("Пожалуйста, выберите оценку книги");
+      return;
+    }
+
+    const textarea = form.querySelector("textarea");
+    const text = textarea?.value.trim() || "";
+
+    if (!text) {
+      alert("Напишите текст отзыва");
+      return;
+    }
+
+    const reviews = readStorage("firebooks_reviews", []);
+
+    reviews.push({
+      ...currentBook,
+      rating,
+      text,
+      authorName: getUserName() || "Гость",
+      date: new Date().toISOString()
+    });
+
+    writeStorage("firebooks_reviews", reviews);
+
+    form.style.display = "none";
+    if (success) success.style.display = "block";
+
+    setTimeout(() => {
+      closeModal(modal);
+      form.reset();
+      form.style.display = "";
+      if (success) success.style.display = "none";
+    }, 2000);
+  });
+}
+
+// ─── Корзина ─────────────────────────────────────────────────
+
+function updateCartTotal() {
+  const totalElement = document.getElementById("cart-total");
+  if (!totalElement) return;
+
+  let total = 0;
+
+  document.querySelectorAll(".cart__item").forEach(item => {
+    const checkbox = item.querySelector(".checkbox");
+    if (checkbox && !checkbox.checked) return;
+
+    const priceElement = item.querySelector(".cart__new-price");
+    const quantityElement = item.querySelector(".cart__input");
+
+    const price = priceNumber(priceElement?.textContent);
+    const quantity = Math.max(1, Number(quantityElement?.value) || 1);
+
+    total += price * quantity;
+  });
+
+  totalElement.textContent = total.toLocaleString("ru-RU") + " ₽";
+}
+
+function initCart() {
+  const cartItems = document.querySelectorAll(".cart__item");
+  if (!cartItems.length) return;
+
+  document.querySelectorAll(".btn--quantity").forEach(button => {
+    button.addEventListener("click", () => {
+      const input = button.parentElement?.querySelector(".cart__input");
+      if (!input) return;
+
+      const current = Math.max(1, Number(input.value) || 1);
+
+      input.value = button.dataset.action === "plus"
+        ? current + 1
+        : Math.max(1, current - 1);
+
+      updateCartTotal();
+    });
+  });
+
+  document.querySelectorAll(".cart__input").forEach(input => {
+    input.addEventListener("change", () => {
+      input.value = Math.max(1, Number(input.value) || 1);
+      updateCartTotal();
+    });
+  });
+
+  const selectAll = document.getElementById("select-all");
+
+  function syncSelectAll() {
+    if (!selectAll) return;
+
+    const checkboxes = Array.from(
+      document.querySelectorAll(".cart__item .checkbox")
+    );
+
+    selectAll.checked =
+      checkboxes.length > 0 && checkboxes.every(box => box.checked);
+  }
+
+  selectAll?.addEventListener("change", () => {
+    document.querySelectorAll(".cart__item .checkbox").forEach(box => {
+      box.checked = selectAll.checked;
+    });
+
+    updateCartTotal();
+  });
+
+  document.querySelectorAll(".cart__item .checkbox").forEach(checkbox => {
+    checkbox.addEventListener("change", () => {
+      syncSelectAll();
+      updateCartTotal();
+    });
+  });
+
+  document.getElementById("remove-selected")?.addEventListener("click", () => {
+    document.querySelectorAll(".cart__item .checkbox:checked").forEach(box => {
+      box.closest(".cart__item")?.remove();
+    });
+
+    syncSelectAll();
+    updateCartTotal();
+  });
+
+  document.getElementById("cart-checkout")?.addEventListener("click", () => {
+    const items = [];
+
+    document.querySelectorAll(".cart__item").forEach(item => {
+      const checkbox = item.querySelector(".checkbox");
+      if (checkbox && !checkbox.checked) return;
+
+      const cover = item.querySelector("img");
+      const title = item.querySelector(".cart__title");
+      const author = item.querySelector(".cart__author");
+      const price = item.querySelector(".cart__new-price");
+      const quantity = item.querySelector(".cart__input");
+
+      const amount = priceNumber(price?.textContent);
+
+      items.push({
+        cover: cover?.getAttribute("src") || "",
+        title: title?.textContent.trim() || "",
+        author: author?.textContent.trim() || "",
+        price: amount,
+        priceText: formatPrice(amount),
+        quantity: Math.max(1, Number(quantity?.value) || 1)
+      });
+    });
+
+    if (!items.length) {
+      alert("Выберите товары для оформления");
+      return;
+    }
+
+    writeStorage("firebooks_checkout", items);window.location.href = "/checkout";
+  });
+
+  syncSelectAll();
+  updateCartTotal();
+}
+
+// ─── Поиск книг ──────────────────────────────────────────────
+
+function initSearch() {
+  const input = document.querySelector(".search__input");
+  if (!input) return;
+
+  // Поле поиска больше не заполнено заранее.
+  input.removeAttribute("value");
+  input.value = "";
+
+  const form = input.closest("form");
+  if (!form) return;
+
+  form.style.position = "relative";
+
+  const suggestions = document.createElement("div");
+  suggestions.className = "search-suggest";
+  suggestions.style.display = "none";
+  form.appendChild(suggestions);
+
+  let timer = null;
+  let requestController = null;
+
+  function hideSuggestions() {
+    suggestions.style.display = "none";
+  }
+
+  function showMessage(message) {
+    suggestions.replaceChildren();
+
+    const element = document.createElement("div");
+    element.className = "search-suggest__empty";
+    element.textContent = message;
+
+    suggestions.appendChild(element);
+    suggestions.style.display = "block";
+  }
+
+  async function searchBooks(query) {
+    requestController?.abort();
+    requestController = new AbortController();
+
+    try {
+      const response = await fetch(
+        `${API}/search?q=${encodeURIComponent(query)}`,
+        { signal: requestController.signal }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Ошибка поиска: ${response.status}`);
+      }
+
+      const books = await response.json();
+
+      if (input.value.trim() !== query) return;
+
+      suggestions.replaceChildren();
+
+      const uniqueBooks = Array.from(
+        new Map(
+          (Array.isArray(books) ? books : [])
+            .map(book => [String(book.id), book])
+        ).values()
+      );
+
+      if (!uniqueBooks.length) {
+        showMessage("Ничего не найдено");
+        return;
+      }
+
+      uniqueBooks.slice(0, 5).forEach(book => {
+        const item = document.createElement("div");
+        item.className = "search-suggest__item";
+        item.dataset.id = String(book.id);
+
+        const image = document.createElement("img");
+        image.className = "search-suggest__cover";
+        image.src = book.cover_url || "";
+        image.alt = "";
+
+        const info = document.createElement("div");
+        info.className = "search-suggest__info";
+
+        const title = document.createElement("p");
+        title.className = "search-suggest__title";
+        title.textContent = book.title || book.full_title || "";
+
+        const author = document.createElement("p");
+        author.className = "search-suggest__author";
+        author.textContent = book.author || "";
+
+        const price = document.createElement("p");
+        price.className = "search-suggest__price";
+        price.textContent = formatPrice(book.new_price);
+
+        info.append(title, author, price);
+        item.append(image, info);
+        suggestions.appendChild(item);
+      });
+
+      suggestions.style.display = "block";
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Ошибка поиска:", error);
+        hideSuggestions();
+      }
+    }
+  }
+
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    requestController?.abort();
+
+    const query = input.value.trim();
+
+    if (query.length < 2) {
+      hideSuggestions();
+      return;
+    }
+
+    timer = setTimeout(() => searchBooks(query), 300);
+  });
+
+  suggestions.addEventListener("click", event => {
+    const item = event.target.closest(".search-suggest__item");
+
+    if (item?.dataset.id) {
+      window.location.href =
+        `/book?id=${encodeURIComponent(item.dataset.id)}`;
+    }
+  });
+
+  document.addEventListener("click", event => {
+    if (!form.contains(event.target)) hideSuggestions();
+  });
+
+  input.addEventListener("focus", () => {
+    if (input.value.trim().length >= 2 && suggestions.children.length) {
+      suggestions.style.display = "block";
+    }
+  });
+
+  form.addEventListener("submit", event => {
+    const query = input.value.trim();
+
+    if(!query) {
+      event.preventDefault();
+      input.focus();
+    }
+  });
+}
+
+// ─── Запуск ──────────────────────────────────────────────────
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadHero();
+
+  loadSection("/books/new", "grid-new");
+  loadSection("/books/bestsellers", "grid-bestsellers");
+  loadSection("/books/upcoming", "grid-upcoming");
+
+// Информацию о пользователе теперь загружает auth_frontend.js.
+
+  initBookCardClicks();
+  initToggleButtons();
+  initReviewPrompts();
+  initReviewModal();
+  initCart();
+  initSearch();
+
+  loadFavorites();
+});

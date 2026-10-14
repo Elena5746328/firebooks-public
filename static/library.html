@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Библиотека — FIREBOOKS</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/cabinet.css">
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+
+    .library__empty,
+    .library__notice {
+      padding: 24px;
+      line-height: 1.6;
+    }
+
+    .library__book-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .library__review-btn {
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .library__review-btn:hover {
+      background: #f5f5f5;
+    }
+
+    .library__review-info {
+      padding: 12px 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .library__review-info p {
+      overflow-wrap: anywhere;
+    }
+
+    .library__modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.55);
+    }
+
+    .library__modal-content {
+      position: relative;
+      width: min(100%, 520px);
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .library__modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      border: 0;
+      background: transparent;
+      font-size: 28px;
+      cursor: pointer;
+    }
+
+    .library__modal-book {
+      display: flex;
+      gap: 16px;
+      margin: 20px 0;
+      align-items: center;
+    }
+
+    .library__modal-book img {
+      width: 72px;
+      max-height: 110px;
+      object-fit: contain;
+    }
+
+    .library__stars {
+      display: flex;
+      gap: 6px;
+      margin: 12px 0 18px;
+    }
+
+    .library__star {
+      border: none;
+      background: transparent;
+      color: #bbb;
+      font-size: 32px;
+      cursor: pointer;
+    }
+
+    .library__star.active {
+      color: #f5aa24;
+    }
+
+    .library__textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      resize: vertical;
+      font: inherit;
+    }
+
+    .library__submit {
+      margin-top: 16px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #222;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .library__submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ШАПКА -->
+<header class="header">
+  <div class="container header__inner">
+    <a href="/" class="logo">
+      <img
+        src="/static/img/Безымянный-1.png"
+        alt="FIREBOOKS"
+        class="logo__img"
+      >
+    </a>
+
+    <nav class="nav">
+      <ul class="nav__list">
+        <li class="nav__item">
+          <a href="/" class="nav__link">Каталог</a>
+        </li>
+        <li class="nav__item">
+          <a
+            href="/library"
+            class="nav__link nav__link--active"
+            aria-current="page"
+          >
+            Мои книги
+          </a>
+        </li>
+        <li class="nav__item">
+          <a href="/cart" class="nav__link">Корзина</a>
+        </li>
+        <li class="nav__item">
+          <a href="/orders" class="nav__link">Заказы</a>
+        </li>
+        <li class="nav__item user-dropdown">
+          <a
+            href="/profile"
+            class="nav__link nav__link--user"
+            id="user-menu"
+          >
+            <span class="user-name">Профиль</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <form
+      class="search"
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <input
+        type="search"
+        name="q"
+        class="search__input"
+        placeholder="Поиск книг..."
+        aria-label="Поиск книг"
+      >
+      <buttontype="submit"
+        class="search__btn"
+        aria-label="Найти"
+      >
+        ⌕
+      </button>
+    </form>
+  </div>
+</header>
+
+<!-- БИБЛИОТЕКА -->
+<main class="cabinet">
+  <div class="cabinet__wrapper">
+
+    <!-- САЙДБАР -->
+    <aside class="sidebar">
+      <div class="sidebar__user">
+        <div
+          class="sidebar__avatar"
+          id="sidebar-avatar"
+        >?</div>
+
+        <span
+          class="sidebar__name"
+          id="sidebar-name"
+        >Пользователь</span>
+      </div>
+
+      <nav class="sidebar__nav">
+
+        <a
+          href="/library"
+          class="sidebar__item sidebar__item--active"
+          aria-current="page"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+          </svg>
+
+          <span class="sidebar__label">Библиотека</span>
+          <span class="sidebar__badge" id="library-count">0</span>
+        </a>
+
+        <a href="/bookmarks" class="sidebar__item">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+          </svg>
+
+          <span class="sidebar__label">Закладки</span>
+          <span class="sidebar__badge" id="bookmarks-count">0</span>
+        </a>
+
+        <a href="/my-reviews" class="sidebar__item">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+
+          <span class="sidebar__label">Мои отзывы</span>
+          <span class="sidebar__badge" id="reviews-count">0</span>
+        </a>
+
+      </nav>
+
+      <div class="sidebar__bottom">
+        <a href="/" class="sidebar__bottom-link">Каталог</a>
+        <a href="/cart" class="sidebar__bottom-link">Корзина</a>
+        <a href="/orders" class="sidebar__bottom-link">Заказы</a>
+      </div>
+    </aside>
+
+    <!-- КОНТЕНТ -->
+    <div class="cabinet__content">
+      <h1 class="cabinet__title">Библиотека</h1>
+
+      <p class="library__notice">
+        Здесь отображаются книги из ваших оформленных
+        демонстрационных заказов.
+      </p>
+
+      <div id="library-empty" class="library__empty" hidden>
+        <p>В вашей библиотеке пока нет книг.</p>
+        <p>
+          <a href="/">
+            Перейти в каталог и выбрать книгу →
+          </a>
+        </p>
+      </div>
+
+      <div
+        class="cabinet__grid"
+        id="library-grid"
+      ></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ФУТЕР -->
+<footer class="footer">
+  <div class="container footer__inner">
+
+    <div class="footer__col">
+      <h3 class="footer__heading">О компании</h3>
+      <ul class="footer__list">
+        <li><a href="#">О FIREBOOKS</a></li>
+        <li><a href="#">Политика конфиденциальности</a></li>
+        <li><a href="#">Вакансии</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Покупателям</h3>
+      <ul class="footer__list">
+        <li><a href="#">Программа лояльности</a></li>
+        <li><a href="#">Подарочные сертификаты</a></li>
+        <li><a href="#">Оплата и доставка</a></li>
+        <li><a href="#">Правила возврата</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Контакты</h3>
+      <ul class="footer__list">
+        <li><a href="#">Контакты и реквизиты</a></li>
+        <li><a href="#">Помощь и ответы на вопросы</a></li>
+        <li><a href="#">Обратная связь</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <imgsrc="/static/img/Безымянный-1.png"
+    alt="FIREBOOKS"
+    class="logo__img footer__logo"
+  >
+
+  <div class="container footer__bottom">
+    <div class="footer__socials">
+      <a href="#" class="social" aria-label="VK">VK</a>
+      <a href="#" class="social" aria-label="Telegram">TG</a>
+      <a href="#" class="social" aria-label="TikTok">TT</a>
+    </div>
+
+    <p class="footer__copyright">
+      2024–2026, ООО «ГРАМОТА»
+      <a href="/recommend" class="footer__recommend-link">
+        На информационном ресурсе применяются
+        рекомендательные технологии
+      </a>
+    </p>
+  </div>
+</footer>
+
+<!-- МОДАЛЬНОЕ ОКНО ОТЗЫВА -->
+<div
+  class="library__modal"
+  id="review-modal"
+  hidden
+>
+  <div
+    class="library__modal-content"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="review-modal-heading"
+  >
+    <button
+      type="button"
+      class="library__modal-close"
+      id="review-close"
+      aria-label="Закрыть"
+    >
+      ×
+    </button>
+
+    <h2 id="review-modal-heading">
+      Написать отзыв
+    </h2>
+
+    <div class="library__modal-book">
+      <img
+        id="review-modal-cover"
+        src=""
+        alt=""
+      >
+
+      <div>
+        <p id="review-modal-title"></p>
+        <p id="review-modal-author"></p>
+      </div>
+    </div>
+
+    <form id="review-form">
+      <p>Ваша оценка</p>
+
+      <div
+        class="library__stars"
+        id="review-stars"
+        aria-label="Оценка от 1 до 5"
+      >
+        <button
+          type="button"
+          class="library__star"
+          data-rating="1"
+          aria-label="1 звезда"
+        >★</button>
+
+        <button
+          type="button"
+          class="library__star"
+          data-rating="2"
+          aria-label="2 звезды"
+        >★</button>
+
+        <button
+          type="button"
+          class="library__star"
+          data-rating="3"
+          aria-label="3 звезды"
+        >★</button>
+
+        <button
+          type="button"
+          class="library__star"
+          data-rating="4"
+          aria-label="4 звезды"
+        >★</button>
+
+        <button
+          type="button"
+          class="library__star"
+          data-rating="5"
+          aria-label="5 звёзд"
+        >★</button>
+      </div>
+
+      <label for="review-text">
+        Ваш отзыв
+      </label>
+
+      <textarea
+        id="review-text"
+        class="library__textarea"
+        placeholder="Поделитесь впечатлениями о книге..."
+        required
+        minlength="5"
+        maxlength="3000"
+      ></textarea>
+
+      <button
+        type="submit"
+        class="library__submit"
+      >
+        Сохранить отзыв
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+(() => {
+  const ORDERS_KEY = "firebooks_orders";
+  const FAVORITES_KEY = "firebooks_favorites";
+  const REVIEWS_KEY = "firebooks_reviews";
+  const CHECKOUT_KEY = "firebooks_checkout";
+
+  const grid = document.getElementById("library-grid");
+  const empty = document.getElementById("library-empty");
+  const modal = document.getElementById("review-modal");
+  const reviewForm = document.getElementById("review-form");
+
+  let currentBook = null;
+  let selectedRating = 0;
+
+  function readArray(key) {
+    try {
+      const data = JSON.parse(
+        localStorage.getItem(key) || "[]"
+      );
+
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveArray(key, array) {
+    localStorage.setItem(key, JSON.stringify(array));
+  }
+
+  function bookId(item) {
+    if (item && typeof item === "object") {
+      return String(item.id ?? "").trim();
+    }
+
+    return String(item ?? "").trim();
+  }
+
+  function reviewBookId(review) {
+    return String(
+      review.bookId ?? review.book_id ?? review.id ?? ""
+    ).trim();
+  }
+
+  function priceNumber(value) {
+    if (typeof value === "number") {
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    return Number(
+      String(value ?? "0").replace(/[^\d]/g, "")
+    ) || 0;
+  }
+
+  function money(value) {
+    return (Number(value)|| 0)
+      .toLocaleString("ru-RU") + " ₽";
+  }
+
+  function make(tag, className, text) {
+    const element = document.createElement(tag);
+
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+
+    return element;
+  }
+
+  function getPurchasedBooks() {
+    const orders = readArray(ORDERS_KEY);
+    const books = new Map();
+
+    orders.forEach(order => {
+      if (!order || !Array.isArray(order.items)) {
+        return;
+      }
+
+      order.items.forEach(item => {
+        if (!item || !item.title) return;
+
+        const id = bookId(item);
+
+        // Для старых записей без ID используем название
+        // как временный ключ только для отображения.
+        const key = id || "title:" + String(item.title);
+
+        if (!books.has(key)) {
+          books.set(key, {
+            id: id || null,
+            title: String(item.title),
+            author: String(item.author || ""),
+            cover: String(
+              item.cover || item.cover_url || ""
+            ),
+            price: priceNumber(
+              item.price ?? item.priceText
+            )
+          });
+        }
+      });
+    });
+
+    return Array.from(books.values());
+  }
+
+  function favoriteIds() {
+    return new Set(
+      readArray(FAVORITES_KEY)
+        .map(bookId)
+        .filter(Boolean)
+    );
+  }
+
+  function isFavorite(book) {
+    return book.id !== null &&
+      favoriteIds().has(String(book.id));
+  }
+
+  function toggleFavorite(book) {
+    if (book.id === null) {
+      alert("Для этой книги отсутствует ID.");
+      return;
+    }
+
+    const favorites = readArray(FAVORITES_KEY);
+    const id = String(book.id);
+
+    const exists = favorites.some(item =>
+      bookId(item) === id
+    );
+
+    const updated = exists
+      ? favorites.filter(item => bookId(item) !== id)
+      : [...favorites, id];
+
+    saveArray(FAVORITES_KEY, updated);
+
+    updateCounters();
+    renderLibrary();
+  }
+
+  function getBookReview(book) {
+    if (book.id === null) return null;
+
+    return readArray(REVIEWS_KEY).find(review =>
+      review &&
+      typeof review === "object" &&
+      reviewBookId(review) === String(book.id)
+    ) || null;
+  }
+
+  function updateProfile() {
+    const name =
+      localStorage.getItem("firebooks_user_name") ||
+      "Пользователь";
+
+    document.querySelector(".user-name").textContent =
+      name;
+
+    document.getElementById("sidebar-name").textContent =
+      name;
+
+    document.getElementById("sidebar-avatar").textContent =
+      name.charAt(0).toUpperCase();
+  }
+
+  function updateCounters() {
+    document.getElementById("library-count").textContent =
+      getPurchasedBooks().length;
+
+    document.getElementById("bookmarks-count").textContent =
+      favoriteIds().size;
+
+    document.getElementById("reviews-count").textContent =
+      readArray(REVIEWS_KEY).length;
+  }
+
+  function buyAgain(book) {
+    if (book.id === null) {
+      alert("Не удалось определить книгу для заказа.");
+      return;
+    }
+
+    const checkoutItem = {
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      cover: book.cover,
+      price: book.price,
+      priceText: money(book.price),
+      quantity: 1
+    };
+
+    saveArray(CHECKOUT_KEY, [checkoutItem]);
+
+    window.location.href = "/checkout";
+  }
+
+  function createBookCard(book) {
+    const wrapper = make("div", "cabinet__card");
+    const card = make("div", "book-card");
+
+    // ОБЛОЖКА
+    const cover = make("div", "book-card__cover");
+
+    const coverLink = make("a");
+
+    coverLink.href = book.id !== null
+      ? "/book?id=" + encodeURIComponent(book.id)
+      : "#";
+
+    const image = make("img");
+
+    image.src = book.cover;
+    image.alt = book.title;
+    image.loading = "lazy";
+
+    coverLink.appendChild(image);
+    cover.appendChild(coverLink);
+
+    // ИЗБРАННОЕ
+    const favorite = make(
+      "button",
+      isFavorite(book)
+        ? "book-card__fav active"
+        : "book-card__fav",
+      "♥"
+    );
+
+    favorite.type = "button";
+    favorite.setAttribute(
+      "aria-label",
+      isFavorite(book)
+        ? "Удалить из закладок"
+        : "Добавить в закладки"
+    );
+
+    favorite.setAttribute(
+      "aria-pressed",
+      String(isFavorite(book))
+    );
+
+    favorite.addEventListener("click", () => {
+      toggleFavorite(book);
+    });
+
+    cover.appendChild(favorite);
+
+    // ИНФОРМАЦИЯ
+    const info = make("div", "book-card__info");
+
+    info.appendChild(
+      make(
+        "p",
+        "book-card__type",
+        "Книга из оформленного заказа"
+      )
+    );
+
+    const prices = make("div", "book-card__prices");
+
+    prices.appendChild(
+      make(
+        "span",
+        "book-card__new-price",
+        money(book.price)
+      )
+    );
+
+    info.appendChild(prices);
+
+    const title = make(
+      "a",
+      "book-card__title",
+      book.title
+    );
+
+    title.href = book.id !== null
+      ? "/book?id=" + encodeURIComponent(book.id)
+      : "#";
+
+    info.appendChild(title);
+
+    info.appendChild(
+      make(
+        "p",
+        "book-card__author",
+        book.author
+      )
+    );
+
+    const buyButton = make(
+      "button",
+      "book-card__btn",
+      "Купить ещё"
+    );
+
+    buyButton.type = "button";
+    buyButton.addEventListener("click", () => {
+      buyAgain(book);
+    });
+
+    info.appendChild(buyButton);
+
+    card.append(cover, info);
+    wrapper.appendChild(card);
+
+    // ОТЗЫВ
+    const review = getBookReview(book);
+
+    if (review) {
+      const reviewBox = make(
+        "div",
+        "library__review-info"
+      );
+
+      const rating = Math.max(
+        0,
+        Math.min(5, Number(review.rating) || 0)
+      );
+
+      reviewBox.appendChild(
+        make(
+          "p",
+          "",
+          "Ваша оценка: " + "★".repeat(rating)
+        )
+      );
+
+      reviewBox.appendChild(
+        make(
+          "p",
+          "",
+          String(review.text || "")
+        )
+      );
+
+      const editButton = make(
+        "button",
+        "library__review-btn",
+        "Изменить отзыв"
+      );
+
+      editButton.type = "button";
+
+      editButton.addEventListener("click", () => {
+        openReviewModal(book);
+      });
+
+      reviewBox.appendChild(editButton);
+      wrapper.appendChild(reviewBox);
+
+    } else {
+      const prompt = make(
+        "div",
+        "review-prompt"
+      );
+
+      prompt.appendChild(
+        make(
+          "p",
+          "review-prompt__text",
+          "Вы можете поделиться впечатлениями об этой книге."
+        )
+      );
+
+      const button = make(
+        "button",
+        "review-prompt__btn",
+        "Написать отзыв"
+      );
+
+      button.type = "button";
+
+      button.addEventListener("click", () => {
+        openReviewModal(book);
+      });
+
+      prompt.appendChild(button);
+      wrapper.appendChild(prompt);
+    }
+
+    return wrapper;
+  }
+
+  function renderLibrary() {
+    const books = getPurchasedBooks();
+
+    grid.replaceChildren();
+
+    empty.hidden = books.length > 0;
+
+    books.forEach(book => {
+      grid.appendChild(createBookCard(book));
+    });
+  }
+
+  function updateStars() {
+    document.querySelectorAll(
+      ".library__star"
+    ).forEach(button => {
+      const value = Number(button.dataset.rating);
+
+      button.classList.toggle(
+        "active",
+        value <= selectedRating
+      );
+
+      button.setAttribute(
+        "aria-pressed",
+        String(value === selectedRating)
+      );
+    });
+  }
+
+  function openReviewModal(book) {
+    if (book.id === null) {
+      alert("У этой книги отсутствует ID для отзыва.");
+      return;
+    }
+
+    currentBook = book;
+
+    const existing = getBookReview(book);
+
+    selectedRating = existing
+      ? Number(existing.rating) || 0
+      : 0;
+
+    document.getElementById(
+      "review-modal-cover"
+    ).src = book.cover;
+
+    document.getElementById(
+      "review-modal-cover"
+    ).alt = book.title;
+
+    document.getElementById(
+      "review-modal-title"
+    ).textContent = book.title;
+
+    document.getElementById(
+      "review-modal-author").textContent = book.author;
+
+    document.getElementById(
+      "review-text"
+    ).value = existing
+      ? String(existing.text || "")
+      : "";
+
+    updateStars();
+
+    modal.hidden = false;
+
+    document.getElementById(
+      "review-text"
+    ).focus();
+  }
+
+  function closeReviewModal() {
+    modal.hidden = true;
+    currentBook = null;
+    selectedRating = 0;
+  }
+
+  document.querySelectorAll(
+    ".library__star"
+  ).forEach(button => {
+    button.addEventListener("click", () => {
+      selectedRating = Number(
+        button.dataset.rating
+      );
+
+      updateStars();
+    });
+  });
+
+  document.getElementById(
+    "review-close"
+  ).addEventListener(
+    "click",
+    closeReviewModal
+  );
+
+  modal.addEventListener("click", event => {
+    if (event.target === modal) {
+      closeReviewModal();
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !modal.hidden) {
+      closeReviewModal();
+    }
+  });
+
+  reviewForm.addEventListener("submit", event => {
+    event.preventDefault();
+
+    if (!currentBook) return;
+
+    if (selectedRating < 1 || selectedRating > 5) {
+      alert("Пожалуйста, выберите оценку от 1 до 5.");
+      return;
+    }
+
+    const text = document.getElementById(
+      "review-text"
+    ).value.trim();
+
+    if (text.length < 5) {
+      alert("Напишите отзыв длиной хотя бы 5 символов.");
+      return;
+    }
+
+    const reviews = readArray(REVIEWS_KEY);
+
+    const existingIndex = reviews.findIndex(review =>
+      review &&
+      typeof review === "object" &&
+      reviewBookId(review) === String(currentBook.id)
+    );
+
+    const newReview = {
+      bookId: currentBook.id,
+      bookTitle: currentBook.title,
+      author: currentBook.author,
+      cover: currentBook.cover,
+      rating: selectedRating,
+      text: text,
+      createdAt: new Date().toISOString()
+    };
+
+    if (existingIndex !== -1) {
+      const oldReview = reviews[existingIndex];
+
+      newReview.createdAt =
+        oldReview.createdAt || newReview.createdAt;
+
+      newReview.updatedAt = new Date().toISOString();
+
+      reviews[existingIndex] = newReview;
+    } else {
+      reviews.unshift(newReview);
+    }
+
+    try {
+      saveArray(REVIEWS_KEY, reviews);
+    } catch (error) {
+      console.error(error);
+      alert("Не удалось сохранить отзыв.");
+      return;
+    }
+
+    closeReviewModal();
+    updateCounters();
+    renderLibrary();
+  });
+
+  window.addEventListener("storage", event => {
+    if (
+      event.key === ORDERS_KEY ||
+      event.key === FAVORITES_KEY ||
+      event.key === REVIEWS_KEY
+    ) {
+      updateCounters();
+      renderLibrary();
+    }
+  });
+
+  updateProfile();
+  updateCounters();
+  renderLibrary();
+})();
+</script>
+
+</body>
+</html>

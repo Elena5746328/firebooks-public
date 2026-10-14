@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Корзина — FIREBOOKS</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="container header__inner">
+    <a href="/" class="logo"><img src="/static/img/Безымянный-1.png" alt="FIREBOOKS" class="logo__img"></a>
+    <nav class="nav"><ul class="nav__list">
+      <li class="nav__item"><a href="/" class="nav__link">Каталог</a></li>
+      <li class="nav__item"><a href="/my-books" class="nav__link">Мои книги</a></li>
+      <li class="nav__item"><a href="/cart" class="nav__link nav__link--active" aria-current="page">Корзина</a></li>
+      <li class="nav__item"><a href="/orders" class="nav__link">Заказы</a></li>
+      <li class="nav__item"><a href="/profile" class="nav__link nav__link--user" id="user-menu"><span class="user-name">Профиль</span></a></li>
+    </ul></nav>
+    <form class="search" action="/search" method="get" role="search">
+      <input type="search" name="q" class="search__input" placeholder="Поиск книг..." aria-label="Поиск книг">
+      <button type="submit" class="search__btn" aria-label="Найти">⌕</button>
+    </form>
+  </div>
+</header>
+
+<main class="cart">
+  <div class="container">
+    <h1 class="cart__title">Корзина</h1>
+
+    <div class="cart__select-all">
+      <input type="checkbox" id="select-all" class="checkbox" checked>
+      <label for="select-all">Выбрать все товары</label>
+    </div>
+
+    <div class="cart__items" id="cart-items"></div>
+
+    <p id="cart-empty" hidden>
+      В корзине пока нет книг.
+      <a href="/">Перейти в каталог</a>
+    </p>
+
+    <div class="cart__footer" id="cart-footer">
+      <button class="btn btn--secondary" type="button" id="remove-selected">
+        Удалить выбранное
+      </button>
+
+      <div class="cart__summary">
+        <p class="cart__total-label">
+          Итого:
+          <span class="cart__total-price" id="cart-total">0 ₽</span>
+        </p>
+      </div>
+
+      <button class="btn--primary" type="button" id="cart-checkout">
+        Оформить заказ
+      </button>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__col">
+      <h3 class="footer__heading">О компании</h3>
+      <ul class="footer__list">
+        <li><a href="#">О FIREBOOKS</a></li>
+        <li><a href="#">Политика конфиденциальности</a></li>
+        <li><a href="#">Вакансии</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Покупателям</h3>
+      <ul class="footer__list">
+        <li><a href="#">Программа лояльности</a></li>
+        <li><a href="#">Подарочные сертификаты</a></li>
+        <li><a href="#">Оплата и доставка</a></li>
+        <li><a href="#">Правила возврата</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Контакты</h3>
+      <ul class="footer__list">
+        <li><a href="#">Контакты и реквизиты</a></li>
+        <li><a href="#">Помощь и ответы на вопросы</a></li>
+        <li><a href="#">Обратная связь</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <img src="/static/img/Безымянный-1.png" alt="FIREBOOKS" class="logo__img footer__logo">
+
+  <div class="container footer__bottom">
+    <div class="footer__socials">
+      <a href="#" class="social" aria-label="VK">VK</a>
+      <a href="#" class="social" aria-label="Telegram">TG</a>
+      <a href="#" class="social" aria-label="TikTok">TT</a>
+      <a href="#" class="social" aria-label="YouTube">YT</a>
+    </div>
+
+    <p class="footer__copyright">
+      2024–2026, ООО «ГРАМОТА»
+      <a href="/recommend" class="footer__recommend-link">
+        На информационном ресурсе применяются рекомендательные технологии
+      </a>
+    </p>
+  </div>
+</footer>
+
+<script>
+"use strict";
+
+(() => {
+  const list = document.getElementById("cart-items");
+  const selectAll = document.getElementById("select-all");
+  const total = document.getElementById("cart-total");
+  const empty = document.getElementById("cart-empty");
+  const footer = document.getElementById("cart-footer");
+  const selectAllBlock = document.querySelector(".cart__select-all");
+  const checkoutButton = document.getElementById("cart-checkout");
+  const removeSelectedButton = document.getElementById("remove-selected");
+
+  let items = [];
+  let selected = new Set();
+  let busy = false;
+
+  const money = amount =>
+    (Number(amount) || 0).toLocaleString("ru-RU") + " ₽";
+
+  function node(tag, className = "", text) {
+    const element = document.createElement(tag);
+    element.className = className;
+
+    if (text !== undefined) {
+      element.textContent = text;
+    }
+
+    return element;
+  }
+
+  async function api(path, options = {}) {
+    const response = await fetch(path, {
+      credentials: "same-origin",
+      ...options
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Войдите в аккаунт, чтобы пользоваться корзиной.");
+      }
+
+      throw new Error("Ошибка сервера: " + response.status);
+    }
+
+    return response.json();
+  }
+
+  function updateTotal() {
+    const sum = items.reduce((result, item) => {
+      return result + (
+        selected.has(Number(item.id))
+          ? Number(item.price) * Number(item.quantity)
+          : 0
+      );
+    }, 0);
+
+    total.textContent = money(sum);
+
+    selectAll.checked =
+      items.length > 0 &&
+      selected.size === items.length;
+
+    selectAll.indeterminate =
+      selected.size > 0 &&
+      selected.size < items.length;
+
+    checkoutButton.disabled = busy || selected.size === 0;
+    removeSelectedButton.disabled = busy || selected.size === 0;
+  }
+
+  function render() {
+    list.replaceChildren();
+
+    items.forEach(item => {
+      const id = Number(item.id);
+
+      const row = node("div", "cart__item");
+      row.dataset.id = String(id);
+
+      const check = node("input", "checkbox");
+      check.type = "checkbox";
+      check.checked = selected.has(id);
+      check.dataset.action = "select";
+      check.setAttribute("aria-label", "Выбрать " + item.title);
+
+      const product = node("div", "cart__product");
+      const imageWrap = node("div", "cart__image");
+      const image = node("img");
+
+      image.src = item.cover || "";
+      image.alt = item.title || "Обложка книги";
+      image.loading = "lazy";
+
+      imageWrap.appendChild(image);
+
+      const info = node("div", "cart__info");
+      info.append(
+        node("h3", "cart__item-title", item.title || "Книга"),
+        node("p", "cart__author", item.author || "")
+      );
+
+      product.append(imageWrap, info);
+
+      const price = node("div", "cart__price");
+      price.appendChild(
+        node("p", "cart__new-price", money(item.price))
+      );
+
+      const quantity = node("div", "cart__quantity");
+
+      const minus = node("button", "btn--quantity", "−");
+      minus.type = "button";
+      minus.dataset.action = "minus";
+
+      const input = node("input", "cart__input");
+      input.type = "number";
+      input.min = "1";
+      input.max = "999";
+      input.value = String(item.quantity);
+      input.setAttribute(
+        "aria-label",
+        "Количество: " + item.title
+      );
+
+      const plus = node("button", "btn--quantity", "+");
+      plus.type = "button";
+      plus.dataset.action = "plus";
+
+      quantity.append(minus, input, plus);
+
+      const remove = node("button", "btn--remove", "✕");
+      remove.type = "button";
+      remove.dataset.action = "remove";
+      remove.setAttribute(
+        "aria-label",
+        "Удалить " + item.title
+      );
+
+      row.append(check, product, price, quantity, remove);
+      list.appendChild(row);
+    });
+
+    empty.hidden = items.length > 0;
+    footer.hidden = items.length === 0;
+    selectAllBlock.hidden = items.length === 0;
+
+    updateTotal();
+  }
+
+  function applyItems(newItems, preserveSelection = true) {
+    const previous = new Set(selected);
+
+    items = Array.isArray(newItems) ? newItems : [];
+
+    selected = new Set(
+      items
+        .filter(item =>
+          !preserveSelection ||
+          previous.has(Number(item.id))
+        )
+        .map(item => Number(item.id))
+    );
+
+    render();
+  }
+
+  async function loadCart() {
+    list.textContent = "Загружаем корзину...";
+    empty.hidden = true;
+    footer.hidden = true;
+    selectAllBlock.hidden = true;
+
+    try {
+      const data = await api("/api/cart");
+      applyItems(data.items, false);
+    } catch (error) {
+      list.textContent = error.message;
+      console.error(error);
+    }
+  }
+
+  async function changeQuantity(id, quantity) {
+    if (busy) return;
+
+    busy = true;
+    updateTotal();
+
+    try {
+      const data = await api("/api/cart/" + id, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          quantity: Math.max(1, Math.min(999, quantity))
+        })
+      });
+
+      applyItems(data.items);
+    } catch (error) {
+      alert(error.message);
+      console.error(error);
+      await loadCart();
+    } finally {
+      busy = false;
+      updateTotal();
+    }
+  }
+
+  async function removeBooks(ids) {
+    if (busy || ids.length === 0) return;
+
+    busy = true;
+    updateTotal();
+
+    try {
+      for (const id of ids) {
+        await api("/api/cart/" + id, {
+          method: "DELETE"
+        });
+      }
+
+      const data = await api("/api/cart");
+      applyItems(data.items);
+    } catch (error) {
+      alert(error.message);
+      console.error(error);
+      await loadCart();
+    } finally {
+      busy = false;
+      updateTotal();
+    }
+  }
+
+  list.addEventListener("click", async event => {
+    const button = event.target.closest("button[data-action]");
+    if (!button || busy) return;
+
+    const row = button.closest(".cart__item");
+    const id = Number(row.dataset.id);
+    const item = items.find(book => Number(book.id) === id);
+
+    if (!item) return;
+
+    if (button.dataset.action === "remove") {
+      await removeBooks([id]);
+      return;
+    }
+
+    const delta = button.dataset.action === "plus" ? 1 : -1;
+    const quantity = Math.max(
+      1,
+      Math.min(999, Number(item.quantity) + delta)
+    );
+
+    await changeQuantity(id, quantity);
+  });
+
+  list.addEventListener("change", async event => {
+    const row = event.target.closest(".cart__item");
+    if (!row || busy) return;
+
+    const id = Number(row.dataset.id);
+
+    if (event.target.dataset.action === "select") {
+      if (event.target.checked) {
+        selected.add(id);
+      } else {
+        selected.delete(id);
+      }
+
+      updateTotal();
+      return;
+    }
+
+    if (event.target.classList.contains("cart__input")) {
+      const quantity = Math.max(
+        1,
+        Math.min(999, Math.floor(Number(event.target.value) || 1))
+      );
+
+      await changeQuantity(id, quantity);
+    }
+  });
+
+  selectAll.addEventListener("change", () => {
+    selected = selectAll.checked
+      ? new Set(items.map(item => Number(item.id)))
+      : new Set();
+
+    render();
+  });
+
+  removeSelectedButton.addEventListener("click", async () => {
+    await removeBooks([...selected]);
+  });
+
+  checkoutButton.addEventListener("click", () => {
+    const checkout = items
+      .filter(item => selected.has(Number(item.id)))
+      .map(item => ({
+        id: Number(item.id),
+        cover: item.cover || "",
+        title: item.title,
+        author: item.author || "",
+        price: Number(item.price),
+        quantity: Number(item.quantity)
+      }));
+
+    if (!checkout.length) return;
+
+    // Пока сохраняем выбранные книги для существующей
+    // страницы оформления заказа.
+    localStorage.setItem(
+      "firebooks_checkout",
+      JSON.stringify(checkout)
+    );
+
+    window.location.href = "/checkout";
+  });
+
+  async function loadProfile() {
+    try {const response = await fetch("/api/auth/me", {
+        credentials: "same-origin"
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const name = data.user?.name;
+
+      if (name) {
+        document.querySelector(".user-name").textContent = name;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  loadProfile();
+  loadCart();
+})();
+</script>
+
+</body>
+</html>

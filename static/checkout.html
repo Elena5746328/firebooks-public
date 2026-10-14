@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оформление заказа — FIREBOOKS</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/cabinet.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header__inner">
+    <a href="/" class="logo">
+      <img src="/static/img/Безымянный-1.png" alt="FIREBOOKS" class="logo__img">
+    </a>
+
+    <nav class="nav">
+      <ul class="nav__list">
+        <li class="nav__item"><a href="/" class="nav__link">Каталог</a></li>
+        <li class="nav__item"><a href="/my-books" class="nav__link">Мои книги</a></li>
+        <li class="nav__item"><a href="/cart" class="nav__link">Корзина</a></li>
+        <li class="nav__item"><a href="/orders" class="nav__link">Заказы</a></li>
+        <li class="nav__item">
+          <a href="/profile" class="nav__link nav__link--user" id="user-menu">
+            <span class="user-name">Профиль</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <form class="search" action="/search" method="get" role="search">
+      <input type="search" name="q" class="search__input" placeholder="Поиск книг...">
+      <button type="submit" class="search__btn" aria-label="Найти">⌕</button>
+    </form>
+  </div>
+</header>
+
+<main class="checkout">
+  <div class="container">
+    <h1 class="cabinet__title">Оформление заказа</h1>
+
+    <div class="checkout__wrapper">
+
+      <!-- ФОРМА -->
+      <form class="checkout__form-side" id="checkout-form">
+
+        <div class="checkout__section">
+          <h2 class="checkout__heading">Контактные данные</h2>
+
+          <div class="checkout__row">
+            <div class="checkout__field">
+              <label class="checkout__label" for="checkout-name">Имя</label>
+              <input
+                type="text"
+                id="checkout-name"
+                class="checkout__input"
+                placeholder="Ваше имя"
+                autocomplete="given-name"
+                required
+              >
+            </div>
+
+            <div class="checkout__field">
+              <label class="checkout__label" for="checkout-phone">Телефон</label>
+              <input
+                type="tel"
+                id="checkout-phone"
+                class="checkout__input"
+                placeholder="+7 (999) 123-45-67"
+                autocomplete="tel"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="checkout__field">
+            <label class="checkout__label" for="checkout-email">Email</label>
+            <input
+              type="email"
+              id="checkout-email"
+              class="checkout__input"
+              placeholder="example@mail.ru"
+              autocomplete="email"
+              required
+            >
+          </div>
+        </div>
+
+        <!-- ДОСТАВКА -->
+        <div class="checkout__section">
+          <h2 class="checkout__heading">Способ доставки</h2>
+
+          <div class="checkout__options">
+            <label class="checkout__option">
+              <input type="radio" name="delivery" value="pickup" checked>
+              <span class="checkout__option-content">
+                <span class="checkout__option-title">Самовывоз</span>
+                <span class="checkout__option-desc">Из магазина, бесплатно</span>
+              </span>
+            </label>
+
+            <label class="checkout__option">
+              <input type="radio" name="delivery" value="courier">
+              <span class="checkout__option-content">
+                <span class="checkout__option-title">Курьер</span>
+                <span class="checkout__option-desc">Доставка по городу, 300 ₽</span>
+              </span>
+            </label>
+
+            <label class="checkout__option">
+              <input type="radio" name="delivery" value="post">
+              <span class="checkout__option-content">
+                <span class="checkout__option-title">Почта России</span>
+                <span class="checkout__option-desc">По всей стране, 250 ₽</span>
+              </span>
+            </label>
+          </div>
+
+          <div
+            class="checkout__field"
+            id="checkout-address-field"
+            hidden
+          >
+            <label class="checkout__label" for="checkout-address">
+              Адрес доставки
+            </label>
+            <input
+              type="text"
+              id="checkout-address"
+              class="checkout__input"
+              placeholder="Город, улица, дом, квартира"
+              autocomplete="street-address"
+            >
+          </div>
+        </div>
+
+        <!-- ОПЛАТА -->
+        <div class="checkout__section">
+          <h2 class="checkout__heading">Способ оплаты</h2>
+
+          <div class="checkout__options">
+            <label class="checkout__option">
+              <input type="radio" name="payment" value="cash" checked>
+              <span class="checkout__option-content">
+                <span class="checkout__option-title">
+                  При получении (демонстрационный заказ)
+                </span>
+              </span>
+            </label>
+
+            <label class="checkout__option">
+              <input type="radio" name="payment" value="card" disabled>
+              <span class="checkout__option-content">
+                <span class="checkout__option-title">Картой онлайн</span>
+                <span class="checkout__option-desc">
+                  Пока недоступно
+                </span>
+              </span>
+            </label>
+
+            <label class="checkout__option">
+              <input type="radio" name="payment" value="bonus" disabled>
+              <span class="checkout__option-content">
+                <span class="checkout__option-title">Бонусами</span>
+                <span class="checkout__option-desc">
+                  Пока недоступно
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+      </form>
+
+      <!-- ИТОГ -->
+      <div class="checkout__summary">
+        <h2 class="checkout__heading">Ваш заказ</h2>
+
+        <div class="checkout__items" id="checkout-items"></div>
+
+        <div class="checkout__total-line">
+          <span>Товары (<span id="checkout-count">0</span> шт.)</span>
+          <span id="checkout-subtotal">0 ₽</span>
+        </div>
+
+        <div class="checkout__total-line">
+          <span>Доставка</span>
+          <span id="checkout-delivery">0 ₽</span>
+        </div>
+
+        <div class="checkout__total-line checkout__total-line--final">
+          <span>Итого</span>
+          <span id="checkout-total">0 ₽</span>
+        </div>
+
+        <button
+          type="submit"
+          form="checkout-form"
+          class="checkout__btn"
+          id="checkout-submit"
+        >
+          Оформить заказ
+        </button>
+
+        <div
+          class="checkout__success"
+          id="checkout-success"
+          hidden
+          role="status"
+        >
+          <p class="checkout__success-icon">✓</p>
+          <p class="checkout__success-title">
+            Демонстрационный заказ создан!
+          </p>
+          <p class="checkout__success-desc">
+            Номер заказа:
+            <strong id="checkout-order-number"></strong>
+          </p>
+          <p>Заказ сохранён в базе данных FIREBOOKS. Оплата не производилась.</p>
+          <a href="/orders" class="checkout__success-link">
+            Перейти к заказам →
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__col">
+      <h3 class="footer__heading">О компании</h3>
+      <ul class="footer__list">
+        <li><a href="#">О FIREBOOKS</a></li>
+        <li><a href="#">Политика конфиденциальности</a></li>
+        <li><a href="#">Вакансии</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Покупателям</h3>
+      <ul class="footer__list">
+        <li><a href="#">Программа лояльности</a></li>
+        <li><a href="#">Подарочные сертификаты</a></li>
+        <li><a href="#">Оплата и доставка</a></li>
+        <li><a href="#">Правила возврата</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Контакты</h3>
+      <ul class="footer__list">
+        <li><a href="#">Контакты и реквизиты</a></li>
+        <li><a href="#">Помощь и ответы на вопросы</a></li>
+        <li><a href="#">Обратная связь</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <img
+    src="/static/img/Безымянный-1.png"
+    alt="FIREBOOKS"
+    class="logo__img footer__logo"
+  >
+
+  <div class="container footer__bottom">
+    <div class="footer__socials">
+      <a href="#" class="social" aria-label="VK">VK</a>
+      <a href="#" class="social" aria-label="Telegram">TG</a>
+      <a href="#" class="social" aria-label="TikTok">TT</a>
+    </div>
+
+    <p class="footer__copyright">
+      2024–2026, ООО «ГРАМОТА»
+      <a href="/recommend" class="footer__recommend-link">
+        На информационном ресурсе применяются рекомендательные технологии
+      </a>
+    </p>
+  </div>
+</footer>
+
+<script>
+"use strict";
+
+(() => {
+  const CHECKOUT_KEY = "firebooks_checkout";
+
+  const form = document.getElementById("checkout-form");
+  const itemsContainer = document.getElementById("checkout-items");
+  const submitButton = document.getElementById("checkout-submit");
+  const success = document.getElementById("checkout-success");
+
+  const money = value =>
+    (Number(value) || 0).toLocaleString("ru-RU") + " ₽";
+
+  function readList(key) {
+    try {
+      const value = JSON.parse(localStorage.getItem(key) || "[]");
+      return Array.isArray(value) ? value : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function normalizeItem(item) {
+    if (!item || typeof item !== "object") return null;
+
+    const id = Number(item.id);
+    if (!Number.isInteger(id) || id <= 0) return null;
+
+    return {
+      id,
+      title: String(item.title || "Книга"),
+      author: String(item.author || ""),
+      cover: String(item.cover || item.cover_url || ""),
+      price: Number(item.price) || 0,
+      quantity: Math.max(
+        1,
+        Math.min(999, Math.floor(Number(item.quantity) || 1))
+      )
+    };
+  }
+
+  const items = readList(CHECKOUT_KEY)
+    .map(normalizeItem)
+    .filter(Boolean);
+
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  const count = items.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+
+  function createElement(tag, className = "", text) {
+    const element = document.createElement(tag);
+    element.className = className;
+
+    if (text !== undefined) {
+      element.textContent = text;
+    }
+
+    return element;
+  }
+
+  function renderItems() {
+    itemsContainer.replaceChildren();
+
+    if (!items.length) {
+      const empty = createElement(
+        "p",
+        "checkout__empty",
+        "Нет товаров для оформления. "
+      );
+
+      const link = createElement(
+        "a",
+        "",
+        "Вернуться в корзину"
+      );
+
+      link.href = "/cart";
+      empty.appendChild(link);
+      itemsContainer.appendChild(empty);
+
+      submitButton.disabled = true;
+      submitButton.hidden = true;
+      return;
+    }
+
+    items.forEach(item => {
+      const row = createElement("div", "checkout__item");
+
+      const image = createElement("img", "checkout__item-cover");
+      image.src = item.cover;
+      image.alt = item.title;
+
+      const info = createElement("div", "checkout__item-info");
+
+      info.append(
+        createElement("p", "checkout__item-title", item.title),
+        createElement("p", "checkout__item-author", item.author),
+        createElement(
+          "p",
+          "checkout__item-price",
+          money(item.price) + " × " + item.quantity
+        ),
+        createElement(
+          "p",
+          "checkout__item-price",
+          "Сумма: " + money(item.price * item.quantity)
+        )
+      );
+
+      row.append(image, info);
+      itemsContainer.appendChild(row);
+    });
+
+    document.getElementById("checkout-count").textContent =
+      String(count);
+
+    document.getElementById("checkout-subtotal").textContent =
+      money(subtotal);
+  }
+
+  function selectedDelivery() {
+    return document.querySelector(
+      'input[name="delivery"]:checked'
+    )?.value || "pickup";
+  }
+
+  function deliveryCost() {
+    const method = selectedDelivery();
+
+    if (method === "courier") return 300;
+    if (method === "post") return 250;
+
+    return 0;
+  }
+
+  function updateSummary() {
+    const needsAddress = selectedDelivery() !== "pickup";
+
+    const addressField = document.getElementById(
+      "checkout-address-field"
+    );
+
+    const addressInput = document.getElementById(
+      "checkout-address"
+    );
+
+    addressField.hidden = !needsAddress;
+    addressField.style.display = needsAddress ? "" : "none";
+    addressInput.required = needsAddress;
+
+    document.getElementById("checkout-delivery").textContent =
+      money(deliveryCost());
+
+    document.getElementById("checkout-total").textContent =
+      money(subtotal + deliveryCost());
+  }
+
+  document.querySelectorAll('input[name="delivery"]')
+    .forEach(radio => {
+      radio.addEventListener("change", updateSummary);
+    });
+
+  async function loadProfile() {
+    try {
+      const response = await fetch("/api/auth/me", {
+        credentials: "same-origin"
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const user = data.user || {};
+
+      if (user.name) {
+        document.querySelector(".user-name").textContent = user.name;
+        document.getElementById("checkout-name").value = user.name;
+      }
+
+      if (user.phone) {
+        document.getElementById("checkout-phone").value = user.phone;
+      }
+
+      if (user.email) {
+        document.getElementById("checkout-email").value = user.email;
+      }
+    } catch (error) {
+      console.error("Ошибка загрузки профиля:", error);
+    }
+  }
+
+  let submitting = false;
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (submitting || !items.length) return;
+    if (!form.reportValidity()) return;
+
+    const customerName = document.getElementById(
+      "checkout-name"
+    ).value.trim();
+
+    const customerPhone = document.getElementById(
+      "checkout-phone"
+    ).value.trim();
+
+    const customerEmail = document.getElementById(
+      "checkout-email"
+    ).value.trim();
+
+    const address = document.getElementById(
+      "checkout-address"
+    ).value.trim();
+
+    if (!customerName || !customerPhone || !customerEmail) {
+      alert("Заполните имя, телефон и email.");
+      return;
+    }
+
+    if (selectedDelivery() !== "pickup" && !address) {
+      alert("Укажите адрес доставки.");
+      return;
+    }
+
+    const orderData = {
+      book_ids: [...new Set(items.map(item => item.id))],
+      customer_name: customerName,
+      customer_phone: customerPhone,
+      customer_email: customerEmail,
+      delivery_method: selectedDelivery(),
+      delivery_address:
+        selectedDelivery() === "pickup" ? "" : address
+    };
+
+    submitting = true;
+    submitButton.disabled = true;
+    submitButton.textContent = "Оформляем заказ...";
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        const detail = result.detail;
+
+        const message = typeof detail === "string"
+          ? detail
+          : "Не удалось оформить заказ.";
+
+        throw new Error(message);
+      }
+
+      // Сервер уже сохранил заказ и удалил купленные
+      // книги из SQLite-корзины.
+      localStorage.removeItem(CHECKOUT_KEY);
+
+      document.getElementById(
+        "checkout-order-number"
+      ).textContent = result.number || "—";
+
+      // Показываем итоговую сумму от сервера.
+      document.getElementById("checkout-subtotal").textContent =
+        money(result.subtotal);
+
+      document.getElementById("checkout-delivery").textContent =
+        money(result.delivery_price);
+
+      document.getElementById("checkout-total").textContent =
+        money(result.total);
+
+      form.hidden = true;
+      form.style.display = "none";
+
+      submitButton.hidden = true;
+      submitButton.style.display = "none";
+
+      success.hidden = false;
+      success.style.display = "block";
+
+    } catch (error) {
+      console.error("Ошибка оформления заказа:", error);
+      alert(error.message);
+    } finally {
+      submitting = false;
+
+      if (success.hidden) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Оформить заказ";
+      }
+    }
+  });
+
+  renderItems();
+  updateSummary();
+  loadProfile();
+})();
+</script>
+
+</body>
+</html>

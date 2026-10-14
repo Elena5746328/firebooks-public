@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIREBOOKS — книжный магазин</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- ШАПКА -->
+<header class="header">
+  <div class="container header__inner">
+    <a href="/" class="logo">
+      <img src="/static/img/Безымянный-1.png" alt="FIREBOOKS" class="logo__img">
+    </a>
+    <nav class="nav" aria-label="Основная навигация">
+      <ul class="nav__list">
+        <li class="nav__item"><a href="/catalog" class="nav__link">Каталог</a></li>
+        <li class="nav__item"><a href="/my-books" class="nav__link">Мои книги</a></li>
+        <li class="nav__item"><a href="/cart" class="nav__link">Корзина</a></li>
+        <li class="nav__item"><a href="/orders" class="nav__link">Заказы</a></li>
+        <li class="nav__item"><a href="/profile" class="nav__link">Профиль</a></li>
+        <li class="nav__item"><a href="#" class="nav__link nav__link--login" id="login-trigger">Войти</a></li>
+      </ul>
+    </nav>
+    <form class="search" action="/search" method="get" role="search">
+      <input type="text" name="q" class="search__input" placeholder="Поиск книг...">
+      <button type="submit" class="search__btn" aria-label="Найти">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </form>
+  </div>
+</header>
+
+<!-- МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ -->
+<div class="modal" id="login-modal">
+  <div class="modal__content">
+    <span class="modal__close" id="modal-close">&times;</span>
+    <h3 class="modal__title">Вход в аккаунт</h3>
+    <form class="modal__form" id="login-form">
+      <div class="modal__field">
+        <label for="login-email" class="modal__label">Email</label>
+        <input type="email" id="login-email" class="modal__input" placeholder="example@mail.ru" required>
+      </div>
+      <div class="modal__field">
+        <label for="login-password" class="modal__label">Пароль</label>
+        <input type="password" id="login-password" class="modal__input" placeholder="Введите пароль" required>
+      </div>
+      <div class="modal__row">
+        <label class="modal__remember"><input type="checkbox"> Запомнить меня</label>
+        <a href="#" class="modal__forgot">Забыли пароль?</a>
+      </div>
+      <button type="submit" class="modal__btn">Войти</button>
+      <p class="modal__register">Нет аккаунта? <a href="#" class="modal__register-link">Зарегистрироваться</a></p>
+    </form>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО РЕГИСТРАЦИИ -->
+<div class="modal" id="register-modal">
+  <div class="modal__content">
+    <span class="modal__close" id="register-close">&times;</span>
+    <h3 class="modal__title">Регистрация</h3>
+    <form class="modal__form" id="register-form">
+      <div class="modal__field">
+        <label for="reg-name" class="modal__label">Имя</label>
+        <input type="text" id="reg-name" class="modal__input" placeholder="Введите ваше имя" required>
+      </div>
+      <div class="modal__field">
+        <label for="reg-surname" class="modal__label">Фамилия <span class="modal__optional">(необязательно)</span></label>
+        <input type="text" id="reg-surname" class="modal__input" placeholder="Введите фамилию">
+      </div>
+      <div class="modal__field">
+        <label for="reg-phone" class="modal__label">Телефон</label>
+        <input type="tel" id="reg-phone" class="modal__input" placeholder="+7 (___) ___-__-__" required>
+      </div>
+      <div class="modal__field">
+        <label for="reg-email" class="modal__label">Email</label>
+        <input type="email" id="reg-email" class="modal__input" placeholder="example@mail.ru" required>
+      </div>
+      <div class="modal__field">
+        <label for="reg-password" class="modal__label">Пароль</label>
+        <input type="password" id="reg-password" class="modal__input" placeholder="Придумайте пароль" required>
+      </div>
+      <button type="submit" class="modal__btn">Зарегистрироваться</button>
+      <p class="modal__register">Уже есть аккаунт? <a href="#" class="modal__login-link">Войти</a></p>
+    </form>
+  </div>
+</div>
+
+<!-- ГЛАВНАЯ СТРАНИЦА: профиль находится только по адресу /profile -->
+<section class="hero">
+  <div class="container hero__inner">
+    <div class="hero__text">
+      <p class="hero__badge">Каталог</p>
+      <p class="hero__desc" id="hero-desc">Загрузка…</p>
+      <h1 class="hero__title" id="hero-title">—</h1>
+      <p class="hero__author" id="hero-author">—</p>
+      <a href="/catalog" class="btn btn--hero">Купить сейчас &rarr;</a>
+      <div class="hero__dots">
+        <span class="dot dot--active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+    <div class="hero__cover">
+      <img id="hero-cover" src="/static/img/0194612e-c1aa-77ef-b35f-892218e71e36.png" alt="Обложка Четвёртое крыло">
+    </div>
+  </div>
+</section>
+
+<section class="books-section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title">Новинки</h2>
+      <a href="/catalog" class="section-all">Смотреть все &rarr;</a>
+    </div>
+    <div class="book-grid" id="grid-new"></div>
+  </div>
+</section>
+
+<section class="books-section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title">Хиты продаж</h2>
+      <a href="/catalog" class="section-all">Смотреть все &rarr;</a>
+    </div>
+    <div class="book-grid" id="grid-bestsellers"></div>
+  </div>
+</section>
+
+<section class="books-section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title">Скоро в продаже</h2>
+      <a href="/catalog" class="section-all">Смотреть все &rarr;</a>
+    </div>
+    <div class="book-grid" id="grid-upcoming"></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__col">
+      <h3 class="footer__heading">О компании</h3>
+      <ul class="footer__list">
+        <li><a href="#">О FIREBOOKS</a></li>
+        <li><a href="#">Политика конфиденциальности</a></li>
+        <li><a href="#">Вакансии</a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <h3 class="footer__heading">Покупателям</h3>
+      <ul class="footer__list">
+        <li><a href="#">Программа лояльности</a></li>
+        <li><a href="#">Подарочные сертификаты</a></li>
+        <li><a href="#">Оплата и доставка</a></li>
+        <li><a href="#">Правила возврата</a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <h3 class="footer__heading">Контакты</h3>
+      <ul class="footer__list">
+        <li><a href="#">Контакты и реквизиты</a></li>
+        <li><a href="#">Помощь и ответы на вопросы</a></li>
+        <li><a href="#">Обратная связь</a></li>
+      </ul>
+    </div>
+  </div>
+  <img src="/static/img/Безымянный-1.png" alt="FIREBOOKS" class="logo__img footer__logo">
+  <div class="container footer__bottom">
+    <div class="footer__socials">
+      <a href="#" class="social" aria-label="VK">VK</a>
+      <a href="#" class="social" aria-label="Telegram">TG</a>
+      <a href="#" class="social" aria-label="TikTok">TT</a>
+      <a href="#" class="social" aria-label="YouTube">YT</a>
+    </div>
+    <p class="footer__copyright">2024–2026, ООО «ГРАМОТА»
+      На информационном ресурсе применяются рекомендательные технологии
+    </p>
+  </div>
+</footer>
+
+<script src="/static/script.js"></script>
+<script src="/static/script.js"></script>
+<script src="/static/auth_frontend.js"></script>
+</body>
+</html>

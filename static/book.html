@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Книга — FIREBOOKS</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/cabinet.css">
+</head>
+<body>
+
+<!-- ШАПКА -->
+<header class="header">
+  <div class="container header__inner">
+    <a href="/" class="logo">
+      <img
+        src="/static/img/Безымянный-1.png"
+        alt="FIREBOOKS"
+        class="logo__img"
+      >
+    </a>
+
+    <nav class="nav">
+      <ul class="nav__list">
+        <li class="nav__item">
+          <a href="/" class="nav__link">Каталог</a>
+        </li>
+        <li class="nav__item">
+          <a href="/my-books" class="nav__link">Мои книги</a>
+        </li>
+        <li class="nav__item">
+          <a href="/cart" class="nav__link">Корзина</a>
+        </li>
+        <li class="nav__item">
+          <a href="/orders" class="nav__link">Заказы</a>
+        </li>
+        <li class="nav__item">
+          <a
+            href="/profile"
+            class="nav__link nav__link--user"
+            id="user-menu"
+          >
+            <span class="user-name">Профиль</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <form
+      class="search"
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <input
+        type="search"
+        name="q"
+        class="search__input"
+        placeholder="Поиск книг..."
+        aria-label="Поиск книг"
+      >
+      <button
+        type="submit"
+        class="search__btn"
+        aria-label="Найти"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </form>
+  </div>
+</header>
+
+<!-- СТРАНИЦА КНИГИ -->
+<main class="book-page">
+
+  <p
+    id="book-message"
+    role="status"
+    style="padding: 16px 0;"
+  >
+    Загружаем информацию о книге...
+  </p>
+
+  <div id="book-content" hidden>
+
+    <div class="book-page__wrapper">
+
+      <!-- ОБЛОЖКА -->
+      <div class="book-page__cover-side">
+        <img
+          id="bp-cover"
+          src=""
+          alt="Обложка книги"
+          class="book-page__cover"
+        >
+
+        <button
+          type="button"
+          id="bp-fav"
+          class="book-page__fav"
+          aria-label="Добавить в избранное"
+          aria-pressed="false"
+        >
+          ♥
+        </button>
+      </div>
+
+      <!-- ИНФОРМАЦИЯ -->
+      <div class="book-page__info">
+
+        <span
+          id="bp-type"
+          class="book-page__type"
+        ></span>
+
+        <h1
+          id="bp-title"
+          class="book-page__title"
+        ></h1>
+
+        <p class="book-page__author">
+          Автор:
+          <strong id="bp-author"></strong>
+        </p>
+
+        <div class="book-page__rating">
+          <div
+            id="bp-stars"
+            class="book-page__stars"
+          ></div>
+
+          <span class="book-page__rating-num">
+            <span id="bp-rating-num"></span>
+            (<span id="bp-reviews"></span>)
+          </span>
+        </div>
+
+        <div class="book-page__prices">
+          <span
+            id="bp-old-price"
+            class="book-page__old-price"
+          ></span>
+
+          <span
+            id="bp-new-price"
+            class="book-page__new-price"
+          ></span>
+
+          <span
+            id="bp-discount"
+            class="book-page__discount"
+            hidden
+          ></span>
+        </div>
+
+        <div class="book-page__actions">
+          <button
+            type="button"
+            id="bp-buy"
+            class="btn--primary"
+          >
+            Купить
+          </button>
+
+          <button
+            type="button"
+            id="bp-cart"
+            class="book-page__cart-btn"
+          >
+            В корзину
+          </button>
+        </div>
+
+        <!-- ХАРАКТЕРИСТИКИ -->
+        <div class="book-page__meta">
+
+          <div class="book-page__meta-row">
+            <span class="book-page__meta-label">
+              Издательство
+            </span>
+            <span
+              id="bp-publisher"
+              class="book-page__meta-value"
+            ></span>
+          </div>
+
+          <div class="book-page__meta-row">
+            <span class="book-page__meta-label">
+              Год издания
+            </span>
+            <span
+              id="bp-year"
+              class="book-page__meta-value"
+            ></span>
+          </div>
+
+          <div class="book-page__meta-row">
+            <span class="book-page__meta-label">
+              Страниц
+            </span>
+            <span
+              id="bp-pages"
+              class="book-page__meta-value"
+            ></span>
+          </div>
+
+          <div class="book-page__meta-row">
+            <span class="book-page__meta-label">
+              ISBN
+            </span>
+            <span
+              id="bp-isbn"
+              class="book-page__meta-value"
+            ></span>
+          </div>
+
+          <div class="book-page__meta-row">
+            <span class="book-page__meta-label">
+              Переплёт
+            </span>
+            <span
+              id="bp-cover-type"
+              class="book-page__meta-value"
+            ></span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ОПИСАНИЕ -->
+    <section class="book-page__description">
+      <h2 class="book-page__heading">
+        Описание
+      </h2>
+
+      <p
+        id="bp-description"
+        class="book-page__desc-text"
+        style="white-space: pre-line;"
+      ></p>
+
+      <button
+        type="button"
+        id="toggle-desc"
+        class="review-block__toggle"
+        hidden
+      >
+        Читать больше
+      </button>
+    </section>
+
+    <!-- ОТЗЫВЫ -->
+    <section class="book-page__reviews-section">
+      <h2 class="book-page__heading">
+        Отзывы
+      </h2>
+
+      <div
+        id="bp-reviews-list"
+        class="reviews-list"
+      ></div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ФУТЕР -->
+<footer class="footer">
+  <div class="container footer__inner">
+
+    <div class="footer__col">
+      <h3 class="footer__heading">
+        О компании
+      </h3>
+      <ul class="footer__list">
+        <li><a href="#">О FIREBOOKS</a></li>
+        <li>
+          <a href="#">Политика конфиденциальности</a>
+        </li>
+        <li><a href="#">Вакансии</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">
+        Покупателям
+      </h3>
+      <ul class="footer__list">
+        <li>
+          <a href="#">Программа лояльности</a>
+        </li>
+        <li>
+          <a href="#">Подарочные сертификаты</a>
+        </li>
+        <li><a href="#">Оплата и доставка</a></li>
+        <li><a href="#">Правила возврата</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">
+        Контакты
+      </h3>
+      <ul class="footer__list">
+        <li>
+          <a href="#">Контакты и реквизиты</a>
+        </li>
+        <li>
+          <a href="#">Помощь и ответы на вопросы</a>
+        </li>
+        <li><a href="#">Обратная связь</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <img
+    src="/static/img/Безымянный-1.png"
+    alt="FIREBOOKS"
+    class="logo__img footer__logo"
+  >
+
+  <div class="container footer__bottom">
+    <div class="footer__socials">
+      <a href="#" class="social" aria-label="VK">VK</a>
+      <a href="#" class="social" aria-label="Telegram">TG</a>
+      <a href="#" class="social" aria-label="TikTok">TT</a>
+      <a href="#" class="social" aria-label="YouTube">YT</a>
+    </div>
+
+    <p class="footer__copyright">
+      2024–2026, ООО «ГРАМОТА»
+      <a
+        href="/recommend"
+        class="footer__recommend-link"
+      >
+        На информационном ресурсе применяются
+        рекомендательные технологии</a>
+    </p>
+  </div>
+</footer>
+
+<script src="/static/script.js"></script>
+<script src="/static/cabinet.js"></script>
+
+<script>
+"use strict";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const bookId = params.get("id");
+
+  const message = document.getElementById("book-message");
+  const content = document.getElementById("book-content");
+
+  function setText(id, value, fallback = "—") {
+    const element = document.getElementById(id);
+
+    if (element) {
+      element.textContent =
+        value !== null &&
+        value !== undefined &&
+        value !== ""
+          ? String(value)
+          : fallback;
+    }
+  }
+
+  function money(value) {
+    const amount = Number(value) || 0;
+
+    return amount.toLocaleString("ru-RU") + " ₽";
+  }
+
+  function readList(key) {
+    try {
+      const value = JSON.parse(
+        localStorage.getItem(key) || "[]"
+      );
+
+      return Array.isArray(value) ? value : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveList(key, list) {
+    localStorage.setItem(key, JSON.stringify(list));
+  }
+
+  function showError(text) {
+    message.textContent = text;
+    message.hidden = false;
+    content.hidden = true;
+  }
+
+  function makeStars(rating) {
+    const value = Math.max(
+      0,
+      Math.min(5, Number(rating) || 0)
+    );
+
+    const wrapper = document.createDocumentFragment();
+
+    for (let index = 0; index < 5; index++) {
+      const star = document.createElement("span");
+
+      star.className =
+        index < Math.round(value)
+          ? "star filled"
+          : "star";
+
+      star.textContent = "★";
+      wrapper.appendChild(star);
+    }
+
+    return wrapper;
+  }
+
+  function renderReviews(reviews) {
+    const list = document.getElementById(
+      "bp-reviews-list"
+    );
+
+    list.replaceChildren();
+
+    if (!Array.isArray(reviews) || !reviews.length) {
+      const empty = document.createElement("p");
+      empty.textContent = "Пока нет отзывов.";
+      empty.style.color = "#999";
+      empty.style.padding = "20px 0";
+
+      list.appendChild(empty);
+      return;
+    }
+
+    reviews.forEach(review => {
+      const block = document.createElement("div");
+      block.className = "review-block";
+
+      const header = document.createElement("div");
+      header.className = "review-block__header";
+
+      const avatar = document.createElement("span");
+      avatar.className = "review-block__avatar";
+      avatar.textContent =
+        String(review.author || "Г").charAt(0);
+
+      const author = document.createElement("span");
+      author.className = "review-block__author";
+      author.textContent = review.author || "Гость";
+
+      const rating = document.createElement("span");
+      rating.className = "review-block__rating";
+      rating.appendChild(makeStars(review.rating));
+
+      header.append(avatar, author, rating);
+
+      const text = document.createElement("p");
+      text.className =
+        "review-block__text review-block__text--clamped";
+      text.textContent = review.text || "";
+
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "review-block__toggle";
+      toggle.textContent = "Читать больше";
+
+      toggle.addEventListener("click", () => {
+        const collapsed = text.classList.toggle(
+          "review-block__text--clamped"
+        );
+
+        toggle.textContent = collapsed
+          ? "Читать больше"
+          : "Свернуть";
+      });
+
+      block.append(header, text, toggle);
+      list.appendChild(block);
+    });
+  }
+
+  function setupDescription(description) {
+    const text = document.getElementById(
+      "bp-description"
+    );
+
+    const toggle = document.getElementById(
+      "toggle-desc"
+    );
+
+    text.textContent =
+      description || "Описание пока не добавлено.";
+
+    // Не зависит от CSS-класса clamped.
+    if (text.textContent.length <= 350) {
+      toggle.hidden = true;
+      return;
+    }
+
+    const fullText =text.textContent;
+    const shortText = fullText.slice(0, 350) + "…";
+
+    let expanded = false;
+
+    text.textContent = shortText;
+    toggle.hidden = false;
+
+    toggle.addEventListener("click", () => {
+      expanded = !expanded;
+
+      text.textContent = expanded
+        ? fullText
+        : shortText;
+
+      toggle.textContent = expanded
+        ? "Свернуть"
+        : "Читать больше";
+    });
+  }
+
+  if (!bookId || !/^\d+$/.test(bookId)) {
+    showError(
+      "Книга не найдена. Вернитесь в каталог."
+    );
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "/api/books/" + encodeURIComponent(bookId)
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        "Не удалось загрузить книгу: " + response.status
+      );
+    }
+
+    const book = await response.json();
+
+    // ЗАПОЛНЕНИЕ КАРТОЧКИ
+    const title = book.full_title || book.title || "Книга";
+
+    document.title = title + " — FIREBOOKS";
+
+    const cover = document.getElementById("bp-cover");
+    cover.src = book.cover_url || "";
+    cover.alt = "Обложка книги «" + title + "»";
+
+    setText("bp-type", book.cover_type, "");
+    setText("bp-title", title);
+    setText("bp-author", book.author);
+    setText("bp-rating-num", book.rating ?? 0, "0");
+
+    const reviewCount = Number(book.reviews_count) || 0;
+
+    setText(
+      "bp-reviews",
+      reviewCount + " отзывов"
+    );
+
+    const stars = document.getElementById("bp-stars");
+    stars.replaceChildren();
+    stars.appendChild(makeStars(book.rating));
+
+    // ЦЕНЫ
+    const newPrice = Number(book.new_price) || 0;
+    const oldPrice = Number(book.old_price) || 0;
+
+    setText("bp-new-price", money(newPrice));
+
+    const oldPriceElement = document.getElementById(
+      "bp-old-price"
+    );
+
+    oldPriceElement.hidden = oldPrice <= newPrice;
+
+    if (oldPrice > newPrice) {
+      oldPriceElement.textContent = money(oldPrice);
+    }
+
+    const discount = document.getElementById(
+      "bp-discount"
+    );
+
+    discount.hidden = !(Number(book.discount) > 0);
+
+    if (!discount.hidden) {
+      discount.textContent = "-" + book.discount + "%";
+    }
+
+    // ХАРАКТЕРИСТИКИ
+    setText("bp-publisher", book.publisher);
+    setText("bp-year", book.year);
+    setText("bp-pages", book.pages);
+    setText("bp-isbn", book.isbn);
+    setText("bp-cover-type", book.cover_type);
+
+    setupDescription(book.description);
+    renderReviews(book.reviews);
+
+    // ОБЪЕКТ ТОВАРА ДЛЯ КОРЗИНЫ И ЗАКАЗА
+    function createCartItem() {
+      return {
+        id: Number(book.id),
+        cover: book.cover_url || "",
+        title: title,
+        author: book.author || "",
+        price: newPrice,
+        priceText: money(newPrice),
+        quantity: 1
+      };
+    }
+
+// ДОБАВЛЕНИЕ КНИГИ В НАСТОЯЩУЮ КОРЗИНУ
+    async function addBookToCart(button, goToCart = false) {
+      const originalText = button.textContent;
+
+      button.disabled = true;
+      button.textContent = "Добавляем...";
+
+      try {
+        const response = await fetch("/api/cart", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            book_id: Number(book.id),
+            quantity: 1
+          })
+        });
+
+        if (response.status === 401) {
+          alert("Сначала войдите в аккаунт.");
+          window.location.href = "/login";
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            "Ошибка добавления в корзину: " + response.status
+          );
+        }
+
+        if (goToCart) {
+          window.location.href = "/cart";
+          return;
+        }
+
+        button.textContent = "Добавлено ✓";
+
+        window.setTimeout(() => {
+          button.textContent = originalText;
+        }, 1800);
+
+      } catch (error) {
+        console.error(error);
+        alert("Не удалось добавить книгу в корзину.");
+        button.textContent = originalText;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    // КНОПКА «КУПИТЬ»
+    document.getElementById("bp-buy")
+      .addEventListener("click", event => {
+        addBookToCart(event.currentTarget, true);
+      });
+
+    // КНОПКА «В КОРЗИНУ»
+    document.getElementById("bp-cart")
+      .addEventListener("click", event => {
+        addBookToCart(event.currentTarget);
+      });
+
+    // ИЗБРАННОЕ
+    const favoriteButton = document.getElementById(
+      "bp-fav"
+    );
+
+    function isFavorite(item) {
+      const id =
+        item && typeof item === "object"
+          ? item.id
+          : item;
+
+      return String(id) === String(book.id);
+    }
+
+    function updateFavoriteButton() {
+      const favorites = readList(
+        "firebooks_favorites"
+      );
+
+      const active = favorites.some(isFavorite);
+
+      favoriteButton.classList.toggle(
+        "active",
+        active
+      );
+
+      favoriteButton.setAttribute(
+        "aria-pressed",
+        String(active)
+      );
+
+      favoriteButton.setAttribute(
+        "aria-label",
+        active
+          ? "Удалить из избранного"
+          : "Добавить в избранное"
+      );
+    }
+
+    favoriteButton.addEventListener("click", () => {
+      const favorites = readList(
+        "firebooks_favorites"
+      );
+
+      const index = favorites.findIndex(isFavorite);
+
+      if (index >= 0) {
+        favorites.splice(index, 1);
+      } else {
+        favorites.push(String(book.id));
+      }
+
+      saveList("firebooks_favorites", favorites);
+      updateFavoriteButton();
+    });
+
+    updateFavoriteButton();
+
+    // ПОКАЗЫВАЕМ ГОТОВУЮ СТРАНИЦУ
+    message.hidden = true;
+    content.hidden = false;
+
+  } catch (error) {
+    console.error("Ошибка страницы книги:", error);
+
+    showError(
+      "Не удалось загрузить книгу. " +
+      "Попробуйте вернуться в каталог."
+    );
+  }
+});
+</script>
+
+</body>
+</html>
