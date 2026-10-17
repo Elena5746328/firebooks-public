@@ -20,7 +20,6 @@
         <li class="nav__item"><a href="/my-books" class="nav__link">Мои книги</a></li>
         <li class="nav__item"><a href="/cart" class="nav__link">Корзина</a></li>
         <li class="nav__item"><a href="/orders" class="nav__link">Заказы</a></li>
-        <li class="nav__item"><a href="/profile" class="nav__link">Профиль</a></li>
         <li class="nav__item"><a href="#" class="nav__link nav__link--login" id="login-trigger">Войти</a></li>
       </ul>
     </nav>
@@ -100,11 +99,33 @@
       <p class="hero__desc" id="hero-desc">Загрузка…</p>
       <h1 class="hero__title" id="hero-title">—</h1>
       <p class="hero__author" id="hero-author">—</p>
-      <a href="/catalog" class="btn btn--hero">Купить сейчас &rarr;</a>
+      <div class="hero__teaser">
+        <h3 class="hero__teaser-title" id="hero-teaser-title">
+          Не каждому суждено стать всадником дракона.
+        </h3>
+
+        <p id="hero-teaser-first">
+          Академия Басгиат не прощает слабости и ошибок.
+          Здесь недостаточно просто мечтать о драконах —
+          нужно доказать, что ты достоин оказаться рядом
+          с ними.
+        </p>
+
+        <p id="hero-teaser-second">
+          Но что, если самое опасное испытание ждёт вовсе
+          не там, где его ожидаешь?
+        </p>
+      </div>
+      <a href="/catalog" class="btn btn--hero" id="hero-buy">Купить сейчас &rarr;</a>
       <div class="hero__dots">
-        <span class="dot dot--active"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
+        <button type="button" class="dot dot--active"
+                aria-label="Четвёртое крыло"></button>
+
+        <button type="button" class="dot"
+                aria-label="Академия вампиров"></button>
+
+        <button type="button" class="dot"
+                aria-label="Гордость и предубеждение"></button>
       </div>
     </div>
     <div class="hero__cover">
@@ -171,7 +192,6 @@
       </ul>
     </div>
   </div>
-  <img src="/static/img/Безымянный-1.png" alt="FIREBOOKS" class="logo__img footer__logo">
   <div class="container footer__bottom">
     <div class="footer__socials">
       <a href="#" class="social" aria-label="VK">VK</a>

@@ -628,19 +628,42 @@
     ) || null;
   }
 
-  function updateProfile() {
-    const name =
-      localStorage.getItem("firebooks_user_name") ||
-      "Пользователь";
+  async function updateProfile() {
+    try {
+      const response = await fetch("/api/auth/me", {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
 
-    document.querySelector(".user-name").textContent =
-      name;
+      if (!response.ok) return;
 
-    document.getElementById("sidebar-name").textContent =
-      name;
+      const data = await response.json();
+      const name = data.user?.name;
 
-    document.getElementById("sidebar-avatar").textContent =
-      name.charAt(0).toUpperCase();
+      if (!name) return;
+
+      const headerName = document.querySelector(
+        "#user-menu .user-name"
+      );
+
+      const sidebarName = document.getElementById(
+        "sidebar-name"
+      );
+
+      const sidebarAvatar = document.getElementById(
+        "sidebar-avatar"
+      );
+
+      if (headerName) headerName.textContent = name;
+      if (sidebarName) sidebarName.textContent = name;
+
+      if (sidebarAvatar) {
+        sidebarAvatar.textContent =
+          name.charAt(0).toUpperCase();
+      }
+    } catch (error) {
+      console.error("Ошибка загрузки профиля:", error);
+    }
   }
 
   function updateCounters() {

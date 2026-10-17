@@ -6,6 +6,128 @@
   <title>Оформление заказа — FIREBOOKS</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="/static/cabinet.css">
+  <style>
+  #checkout-success[hidden] {
+    display: none !important;
+  }
+
+  .fb-success-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(30, 18, 24, 0.65);
+    backdrop-filter: blur(5px);
+  }
+
+  .fb-success-card {
+    width: 100%;
+    max-width: 470px;
+    padding: 42px 32px;
+    border-radius: 22px;
+    background: #fffaf5;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .fb-success-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 22px;
+    border-radius: 50%;
+    background: #e7f3e9;
+    color: #34834c;
+    font-size: 42px;
+    font-weight: bold;
+  }
+
+  .fb-success-card h2 {
+    margin: 0 0 15px;
+    color: #641c35;
+    font-family: Georgia, serif;
+    font-size: 28px;
+    line-height: 1.3;
+  }
+
+  .fb-success-text {
+    color: #67595d;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .fb-success-number {
+    margin: 25px 0;
+    padding: 17px;
+    border-radius: 12px;
+    background: #f5e9e7;
+    color: #641c35;
+    font-size: 15px;
+  }
+
+  .fb-success-number strong {
+    display: block;
+    margin-top: 7px;
+    font-size: 23px;
+  }
+
+  .fb-success-note {
+    color: #807378;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .fb-success-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .fb-success-actions a {
+    display: block;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .fb-success-primary {
+    background: #641c35;
+    color: #fff !important;
+  }
+
+  .fb-success-primary:hover {
+    background: #842d4b;
+  }
+
+  .fb-success-secondary {
+    background: #f1e3e1;
+    color: #641c35 !important;
+  }
+
+  .fb-success-secondary:hover {
+    background: #e8d3d0;
+  }
+
+  @media (max-width: 480px) {
+    .fb-success-card {
+      padding: 30px 20px;
+    }
+
+    .fb-success-card h2 {
+      font-size: 24px;
+    }
+  }
+</style>
 </head>
 <body>
 
@@ -144,7 +266,7 @@
               <input type="radio" name="payment" value="cash" checked>
               <span class="checkout__option-content">
                 <span class="checkout__option-title">
-                  При получении (демонстрационный заказ)
+                  Оплата при получении
                 </span>
               </span>
             </label>
@@ -203,23 +325,47 @@
         </button>
 
         <div
-          class="checkout__success"
           id="checkout-success"
+          class="fb-success-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="fb-success-title"
           hidden
-          role="status"
         >
-          <p class="checkout__success-icon">✓</p>
-          <p class="checkout__success-title">
-            Демонстрационный заказ создан!
-          </p>
-          <p class="checkout__success-desc">
-            Номер заказа:
-            <strong id="checkout-order-number"></strong>
-          </p>
-          <p>Заказ сохранён в базе данных FIREBOOKS. Оплата не производилась.</p>
-          <a href="/orders" class="checkout__success-link">
-            Перейти к заказам →
-          </a>
+          <div class="fb-success-card">
+
+            <div class="fb-success-icon">✓</div>
+
+            <h2 id="fb-success-title">
+              Заказ успешно оформлен!
+            </h2>
+
+            <p class="fb-success-text">
+              Спасибо, что выбрали FIREBOOKS!
+              Ваш заказ принят и сохранён.
+            </p>
+
+            <div class="fb-success-number">
+              Номер вашего заказа
+              <strong id="checkout-order-number"></strong>
+            </div>
+
+            <p class="fb-success-note">
+              Информацию о покупке можно посмотреть
+              в личном кабинете.
+            </p>
+
+            <div class="fb-success-actions">
+              <a href="/orders" class="fb-success-primary">
+                Мои заказы
+              </a>
+
+              <a href="/catalog" class="fb-success-secondary">
+                Вернуться в каталог
+              </a>
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -572,7 +718,7 @@
       submitButton.style.display = "none";
 
       success.hidden = false;
-      success.style.display = "block";
+      success.style.display = "flex";
 
     } catch (error) {
       console.error("Ошибка оформления заказа:", error);

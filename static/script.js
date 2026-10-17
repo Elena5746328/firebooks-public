@@ -99,107 +99,283 @@ async function loadSection(endpoint, gridId, count = 5) {
   const grid = document.getElementById(gridId);
   if (!grid) return;
 
+  const section = grid.closest(".books-section");
+  const viewAllLink = section?.querySelector(".section-all");
+
   skeletonCards(grid, count);
 
   try {
     const response = await fetch(`${API}${endpoint}`);
+
     if (!response.ok) {
       throw new Error(`Ошибка API: ${response.status}`);
     }
 
     const books = await response.json();
+
     if (!Array.isArray(books)) {
       throw new Error("Неверный формат списка книг");
     }
 
     sectionState[gridId] = {
       books,
-      shown: Math.min(count, books.length),
-      step: count
+      expanded: false
     };
 
-    grid.innerHTML = books.slice(0, count).map(bookCardHTML).join("");
-    syncFavoriteButtons(grid);
+    function renderSection() {
+      const state = sectionState[gridId];
 
-    if (books.length > count) {
-      addViewAllButton(gridId);
+      const visibleBooks = state.expanded
+        ? state.books
+        : state.books.slice(0, count);
+
+      grid.classList.toggle(
+        "books-expanded",
+        state.expanded
+      );
+
+      grid.innerHTML = visibleBooks
+        .map(bookCardHTML)
+        .join("");
+
+      syncFavoriteButtons(grid);
+
+      if (viewAllLink && books.length > count) {
+        viewAllLink.textContent = state.expanded
+          ? "Свернуть ↑"
+          : "Смотреть все →";
+
+        viewAllLink.setAttribute(
+          "aria-expanded",
+          String(state.expanded)
+        );
+      }
     }
+
+    renderSection();
+
+    if (viewAllLink && books.length > count) {
+      viewAllLink.addEventListener("click", event => {
+        event.preventDefault();
+
+        sectionState[gridId].expanded =
+          !sectionState[gridId].expanded;
+
+        renderSection();
+      });
+    }
+
+    // Если в разделе только пять книг,
+    // ссылка продолжит вести в полный каталог.
+
   } catch (error) {
     grid.innerHTML = "";
+
     const message = document.createElement("p");
     message.textContent = "Не удалось загрузить книги";
     message.style.gridColumn = "1 / -1";
-    message.style.color = "#999";
+
     grid.appendChild(message);
+
     console.error("Ошибка загрузки книг:", error);
   }
 }
 
-function addViewAllButton(gridId) {
-  const grid = document.getElementById(gridId);
-  if (!grid) return;
-
-  const buttonId = `viewall-${gridId}`;
-  if (document.getElementById(buttonId)) return;
-
-  const button = document.createElement("button");
-  button.type = "button";
-  button.id = buttonId;
-  button.className = "view-all-btn";
-  button.textContent = "Смотреть все";
-  button.addEventListener("click", () => loadMore(gridId));
-
-  grid.parentElement.appendChild(button);
-}
-
-function loadMore(gridId) {
-  const state = sectionState[gridId];
-  const grid = document.getElementById(gridId);
-  if (!state || !grid) return;
-
-  const start = state.shown;
-  const end = Math.min(start + state.step, state.books.length);
-
-  grid.insertAdjacentHTML(
-    "beforeend",
-    state.books.slice(start, end).map(bookCardHTML).join("")
-  );
-
-  state.shown = end;
-  syncFavoriteButtons(grid);
-
-  if (end >= state.books.length) {
-    const button = document.getElementById(`viewall-${gridId}`);
-    if (button) button.remove();
-  }
-}
-
 async function loadHero() {
-  if (!document.getElementById("hero-title")) return;
+  const title = document.getElementById("hero-title");
+  if (!title) return;
+
+  const description = document.getElementById("hero-desc");
+  const author = document.getElementById("hero-author");
+  const cover = document.getElementById("hero-cover");
+  const teaserTitle = document.getElementById("hero-teaser-title");
+  const teaserFirst = document.getElementById("hero-teaser-first");
+  const teaserSecond = document.getElementById("hero-teaser-second");
+  const buyButton = document.getElementById("hero-buy");
+  const dots = [...document.querySelectorAll(".hero__dots .dot")];
+
+  const slides = [
+    {
+      searchTitle: "Четвёртое крыло",
+      title: "Четвёртое крыло",
+      author: "Ребекка Яррос",
+      description: "",
+      teaserTitle: "Не каждому суждено стать всадником дракона.",
+      teaserFirst:
+        "Академия Басгиат не прощает слабости и ошибок. Здесь недостаточно просто мечтать о драконах — нужно доказать, что ты достоин оказаться рядом с ними.",
+      teaserSecond:
+        "Но что, если самое опасное испытание ждёт вовсе не там, где его ожидаешь?",
+      cover_url: "",
+      bookId: null
+    },
+    {
+      searchTitle: "Академия вампиров",
+      title: "Академия вампиров",
+      author: "Райчел Мид",
+      description: "История о тайнах, выборе и верности.",
+      teaserTitle:
+        "Некоторые тайны лучше держать подальше от посторонних глаз.",
+      teaserFirst:
+        "Розмари Хэзэвей привыкла нарушать правила, особенно когда дело касается защиты лучшей подруги. Но возвращение в академию Святого Владимира оказывается куда сложнее, чем она ожидала. Здесь опасность скрывается не только за пределами школьных стен, а доверять собственным чувствам порой труднее, чем противостоять врагам.",
+      teaserSecond:
+        "И что делать, когда сердце начинает спорить с долгом?",
+      cover_url: "",
+      bookId: null
+    },
+    {
+      searchTitle: "Гордость и предубеждение",
+      title: "Гордость и предубеждение",
+      author: "Джейн Остин",
+      description: "Роман о чувствах и первых впечатлениях.",
+      teaserTitle:
+        "Первое впечатление бывает обманчивым. Особенно когда дело касается любви.",
+      teaserFirst:
+        "Элизабет Беннет не собирается жить по чужим правилам. А мистер Дарси кажется ей последним человеком, способным завоевать ее расположение. Но за холодной сдержанностью и острыми разговорами скрывается гораздо больше, чем кажется.",
+      teaserSecond:
+        "Что окажется сильнее — гордость, предубеждение или неожиданные чувства?",
+      cover_url: "",
+      bookId: null
+    }
+  ];
+
+  function normalizeTitle(value) {
+    return String(value || "")
+      .toLocaleLowerCase("ru")
+      .replace(/ё/g, "е")
+      .trim();
+  }
+
+  function showSlide(index) {
+    const slide = slides[index];
+
+    if (!slide.cover_url) {
+      console.warn("Для баннера не найдена обложка:", slide.title);
+      return;
+    }
+
+    if (description) {
+      description.textContent = slide.description;
+    }
+
+    title.textContent = slide.title;
+
+    if (author) {
+      author.textContent = slide.author;
+    }
+
+    if (teaserTitle) {
+      teaserTitle.textContent = slide.teaserTitle;
+    }
+
+    if (teaserFirst) {
+      teaserFirst.textContent = slide.teaserFirst;
+    }
+
+    if (teaserSecond) {
+      teaserSecond.textContent = slide.teaserSecond;
+    }
+
+    if (cover) {
+      cover.src = slide.cover_url;
+      cover.alt = `Обложка книги «${slide.title}»`;
+    }
+
+    if (buyButton) {
+      buyButton.href = slide.bookId != null
+        ? `/book?id=${encodeURIComponent(slide.bookId)}`
+        : `/catalog?q=${encodeURIComponent(slide.searchTitle)}`;
+    }
+
+    dots.forEach((dot, dotIndex) => {
+      const active = dotIndex === index;
+      dot.classList.toggle("dot--active", active);
+      dot.setAttribute("aria-pressed", String(active));
+    });
+  }
 
   try {
-    const response = await fetch(`${API}/hero`);
-    if (!response.ok) {
-      throw new Error(`Ошибка API: ${response.status}`);
+    const [heroResponse, booksResponse] = await Promise.all([
+      fetch(`${API}/hero`),
+      fetch(`${API}/books`)
+    ]);
+
+    if (!heroResponse.ok || !booksResponse.ok) {
+      throw new Error("Не удалось загрузить книги для баннеров");
     }
 
-    const data = await response.json();
+    const heroData = await heroResponse.json();
+    const books = await booksResponse.json();
 
-    const description = document.getElementById("hero-desc");
-    const title = document.getElementById("hero-title");
-    const author = document.getElementById("hero-author");
-    const cover = document.getElementById("hero-cover");
-
-    if (description) description.textContent = data.description || "";
-    if (title) title.textContent = data.title || "";
-    if (author) author.textContent = data.author || "";
-
-    if (cover && data.cover_url) {
-      cover.src = data.cover_url;
-      cover.alt = data.title || "Обложка книги";
+    if (!Array.isArray(books)) {
+      throw new Error("Каталог вернул неверный формат данных");
     }
+
+    // Первый баннер сохраняет свою исходную обложку.
+    slides[0].title = heroData.title || slides[0].title;
+    slides[0].author = heroData.author || slides[0].author;
+    slides[0].description = heroData.description || "";
+    slides[0].cover_url =
+      heroData.cover_url || cover?.getAttribute("src") || "";
+
+    // Находим все три книги в существующем каталоге.
+    slides.forEach((slide, index) => {
+      const book = books.find(item => {
+        const bookTitle = normalizeTitle(
+          item.full_title || item.title
+        );
+
+        return bookTitle.includes(
+          normalizeTitle(slide.searchTitle)
+        );
+      });
+
+      if (!book) {
+        console.warn("Книга отсутствует в каталоге:", slide.searchTitle);
+        return;
+      }
+
+      slide.bookId = book.id ?? null;
+
+      // Для второго и третьего баннеров
+      // используем обложки из каталога.
+      if (index !== 0) {
+        slide.cover_url = book.cover_url || "";
+      }
+    });
+
+    const heroInner = title.closest(".hero__inner");
+
+    if (heroInner && window.innerWidth > 850) {
+      // Временно скрываем баннер для измерения
+      heroInner.style.visibility = "hidden";
+      heroInner.style.height = "auto";
+
+      // Измеряем второй баннер — «Академия вампиров»
+      showSlide(1);
+
+      const referenceHeight = Math.ceil(
+        heroInner.getBoundingClientRect().height
+      );
+
+      // Фиксируем одинаковую высоту всех трёх баннеров
+      heroInner.style.height = `${referenceHeight}px`;
+
+      // Возвращаем «Четвёртое крыло»
+      showSlide(0);
+      heroInner.style.visibility = "";
+    } else {
+      showSlide(0);
+    }
+
+    // Переключение между тремя книгами
+    dots.forEach((dot, index) => {
+      dot.addEventListener("click", () => {
+        showSlide(index);
+      });
+    });
+
   } catch (error) {
-    console.error("Ошибка загрузки баннера:", error);
+    console.error("Ошибка загрузки баннеров:", error);
   }
 }
 
@@ -367,14 +543,6 @@ function initAuthentication() {
     if (event.target.closest("#register-close")) {
       closeModal(registerModal);
     }
-  });
-
-  [loginModal, registerModal].forEach(modal => {
-    if (!modal) return;
-
-    modal.addEventListener("click", event => {
-      if (event.target === modal) closeModal(modal);
-    });
   });
 
   document.addEventListener("keydown", event => {

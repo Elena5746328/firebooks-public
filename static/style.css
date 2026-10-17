@@ -2661,5 +2661,501 @@ img { max-width: 100%; display: block; }
   }
 }
 
+/* ==========================================
+   FIREBOOKS — улучшение дизайна сайта
+   ========================================== */
 
+/* 1. Расширяем содержимое страниц */
+.container {
+  max-width: 1400px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
 
+.cabinet__wrapper {
+  max-width: 1400px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* 2. Приводим шапку к единому виду */
+.header__inner {
+  column-gap: 22px;
+  row-gap: 14px;
+  flex-wrap: wrap;
+}
+
+.header .nav__list {
+  gap: 20px;
+  align-items: center;
+}
+
+.header .nav__item,
+.header .nav__link {
+  white-space: nowrap;
+}
+
+/* 3. Защищаем поиск от сжатия */
+.header .search {
+  flex: 0 1 300px;
+  width: 300px;
+  min-width: 190px;
+  max-width: 300px;
+  align-items: center;
+}
+
+.header .search__input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 50px;
+  border-radius: 25px 0 0 25px;
+  border-right: none;
+}
+
+.header .search__btn {
+  position: relative;
+  flex: 0 0 50px;
+  width: 50px;
+  min-width: 50px;
+  height: 50px;
+  padding: 0;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0;
+}
+
+/* Одинаковая аккуратная лупа на всех страницах */
+.header .search__btn svg {
+  display: none;
+}
+
+.header .search__btn::before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: calc(50% - 10px);
+  left: calc(50% - 10px);
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.header .search__btn::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 2px;
+  top: calc(50% + 6px);
+  left: calc(50% + 3px);
+  background: currentColor;
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+
+/* 4. Даём итоговой стоимости место в корзине */
+.cart__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.cart__summary {
+  flex: 1 1 190px;
+  min-width: 190px;
+  text-align: center;
+}
+
+.cart__total-price {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.cart__footer button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 5. Убираем только нижний логотип */
+.footer > .footer__logo {
+  display: none !important;
+}
+
+/* FIREBOOKS — размер верхнего меню */
+
+.header .nav__link {
+  font-size: 18px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.header .nav__link--login {
+  font-weight: 700;
+}
+
+/* FIREBOOKS — цельное поле поиска */
+
+.header .search {
+  display: flex;
+  align-items: center;
+  height: 54px;
+  padding: 3px;
+  border: 1px solid #dcdcdc;
+  border-radius: 999px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.header .search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0 16px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  outline: none;
+}
+
+.header .search__btn {
+  flex: 0 0 46px;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  margin: 0;
+}
+
+/* FIREBOOKS — просторное верхнее меню */
+
+.header .nav__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 32px;
+}
+
+.header .nav__item {
+  flex-shrink: 0;
+}
+
+.header .nav__link {
+  white-space: nowrap;
+  font-size: 18px;
+}
+
+/* FIREBOOKS — главный баннер в виде карточки */
+
+.hero {
+  background: transparent;
+  padding: 36px 24px 24px;
+  overflow: visible;
+}
+
+.hero__inner {
+  max-width: 1352px;
+  margin: 0 auto;
+  padding: 48px 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 56px;
+
+  background: var(--burgundy);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(74, 14, 30, 0.12);
+}
+
+.hero__text {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 580px;
+}
+
+.hero__badge {
+  color: #e7c9a8;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.hero__title {
+  color: #ffffff;
+  font-size: 46px;
+  line-height: 1.15;
+  margin-bottom: 18px;
+}
+
+.hero__desc,
+.hero__author {
+  color: #f1dedc;
+}
+
+.hero__desc {
+  margin-bottom: 20px;
+}
+
+.hero__author {
+  margin-bottom: 28px;
+}
+
+.hero .btn--hero {
+  border-radius: 8px;
+}
+
+.hero__dots .dot {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hero__dots .dot--active {
+  background: #ffffff;
+}
+
+@media (max-width: 850px) {
+  .hero__inner {
+    padding: 36px 28px;
+    gap: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero__cover {
+    width: 100%;
+    flex: none;
+  }
+
+  .hero__title {
+    font-size: 36px;
+  }
+}
+
+/* FIREBOOKS — компактнее главный баннер */
+
+.hero {
+  padding-top: 26px;
+  padding-bottom: 20px;
+}
+
+.hero__inner {
+  padding: 34px 64px;
+}
+
+/* FIREBOOKS — интригующий текст в баннере */
+
+.hero__teaser {
+  max-width: 520px;
+  margin: 16px 0 24px;
+  color: #f1dfd9;
+}
+
+.hero__teaser-title {
+  margin: 0 0 12px;
+  color: #ffffff;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.hero__teaser p {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.hero__teaser p:last-child {
+  margin-bottom: 0;
+}
+
+/* FIREBOOKS — читаемый текст главного баннера */
+
+.hero .hero__teaser,
+.hero .hero__teaser-title,
+.hero .hero__teaser p {
+  color: #ffffff;
+}
+
+.hero .hero__teaser-title {
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.hero .hero__teaser p {
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* FIREBOOKS — более длинная строка поиска */
+
+.header .search {
+  flex: 0 1 390px;
+  width: 390px;
+  max-width: 390px;
+  min-width: 220px;
+}
+
+/* FIREBOOKS — переключатели баннеров */
+
+.hero__dots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero__dots .dot {
+  display: block;
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.hero__dots .dot--active {
+  background: #ffffff;
+}
+
+.hero__dots .dot:focus-visible {
+  outline: 2px solid #d9b58a;
+  outline-offset: 4px;
+}
+
+/* FIREBOOKS — одинаковый размер всех трёх баннеров */
+
+.hero__inner {
+  min-height: 620px;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+/* Одинаковое пространство для текста */
+.hero__text {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Ограничиваем область обложки */
+.hero__cover {
+  flex: 0 0 360px;
+  width: 360px;
+  height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Не позволяем обложкам менять размер баннера */
+.hero__cover img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* На узких экранах оставляем адаптивную высоту */
+@media (max-width: 850px) {
+  .hero__inner {
+    min-height: 0;
+  }
+
+  .hero__cover {
+    flex: none;
+    width: 100%;
+    height: 340px;
+  }
+}
+
+/* FIREBOOKS — книжные разделы главной страницы */
+
+.books-section .section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.books-section .section-all {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Четыре книги в одном ряду */
+.books-section .book-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+/* Подготовка к небольшим экранам */
+@media (max-width: 900px) {
+  .books-section .book-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 550px) {
+  .books-section .book-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* FIREBOOKS — правильное расположение книжных разделов */
+
+/* Заголовок и книги больше не стоят бок о бок */
+.books-section > .container {
+  display: block;
+  width: 100%;
+}
+
+/* Заголовок слева, ссылка справа */
+.books-section .section-head {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.books-section .section-title {
+  margin: 0;
+  flex: 0 1 auto;
+}
+
+.books-section .section-all {
+  margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.books-section .book-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 20px;
+  margin: 0;
+}
+
+/* На небольших экранах */
+@media (max-width: 900px) {
+  .books-section .book-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 550px) {
+  .books-section .book-grid {
+    grid-template-columns: 1fr;
+  }
+}

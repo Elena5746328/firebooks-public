@@ -202,18 +202,6 @@ function initRealAuthentication() {
     }
   });
 
-  // Закрытие при нажатии вне окна
-
-  [loginModal, registerModal].forEach(modal => {
-    if (!modal) return;
-
-    modal.addEventListener("click", event => {
-      if (event.target === modal) {
-        closeModal(modal);
-      }
-    });
-  });
-
   // Закрытие по Escape
 
   document.addEventListener("keydown", event => {
