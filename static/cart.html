@@ -15,7 +15,11 @@
       <li class="nav__item"><a href="/my-books" class="nav__link">Мои книги</a></li>
       <li class="nav__item"><a href="/cart" class="nav__link nav__link--active" aria-current="page">Корзина</a></li>
       <li class="nav__item"><a href="/orders" class="nav__link">Заказы</a></li>
-      <li class="nav__item"><a href="/profile" class="nav__link nav__link--user" id="user-menu"><span class="user-name">Профиль</span></a></li>
+      <li class="nav__item">
+        <a href="/profile" class="nav__link nav__link--user" id="user-menu">
+          <span class="user-name">Профиль</span>
+        </a>
+      </li>
     </ul></nav>
     <form class="search" action="/search" method="get" role="search">
       <input type="search" name="q" class="search__input" placeholder="Поиск книг..." aria-label="Поиск книг">
@@ -432,8 +436,10 @@
   });
 
   async function loadProfile() {
-    try {const response = await fetch("/api/auth/me", {
-        credentials: "same-origin"
+    try {
+      const response = await fetch("/api/auth/me", {
+        credentials: "same-origin",
+        cache: "no-store"
       });
 
       if (!response.ok) return;
@@ -441,16 +447,30 @@
       const data = await response.json();
       const name = data.user?.name;
 
-      if (name) {
-        document.querySelector(".user-name").textContent = name;
+      if (!name) return;
+
+      const userLink = document.getElementById("user-menu");
+
+      if (userLink) {
+        userLink.href = "/profile";
+
+        let nameElement = userLink.querySelector(".user-name");
+
+        if (!nameElement) {
+          nameElement = document.createElement("span");
+          nameElement.className = "user-name";
+          userLink.replaceChildren(nameElement);
+        }
+
+        nameElement.textContent = name;
       }
     } catch (error) {
-      console.error(error);
+      console.error("Ошибка загрузки имени:", error);
     }
   }
 
   loadProfile();
-  loadCart();
+
 })();
 </script>
 

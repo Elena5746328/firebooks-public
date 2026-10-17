@@ -103,6 +103,30 @@ def init_db():
             );
         """)
 
+        # Добавляем недостающие поля для оформления заказов
+        order_columns = {
+            row["name"]
+            for row in connection.execute(
+                "PRAGMA table_info(orders)"
+            ).fetchall()
+        }
+
+        required_columns = {
+            "customer_name": "TEXT NOT NULL DEFAULT ''",
+            "customer_phone": "TEXT NOT NULL DEFAULT ''",
+            "customer_email": "TEXT NOT NULL DEFAULT ''",
+            "delivery_method": "TEXT NOT NULL DEFAULT 'pickup'",
+            "delivery_address": "TEXT NOT NULL DEFAULT ''",
+            "delivery_price": "INTEGER NOT NULL DEFAULT 0",
+            "payment_method": "TEXT NOT NULL DEFAULT 'cash'",
+        }
+
+        for column, definition in required_columns.items():
+            if column not in order_columns:
+                connection.execute(
+                    f"ALTER TABLE orders ADD COLUMN {column} {definition}"
+                )
+
 def seed_books(books):
     """
     Добавляет только отсутствующие книги.

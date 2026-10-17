@@ -762,5 +762,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const response = await fetch("/api/auth/me", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const name = data.user?.name;
+
+    const nameElement = document.querySelector(
+      "#user-menu .user-name"
+    );
+
+    if (name && nameElement) {
+      nameElement.textContent = name;
+    }
+  } catch (error) {
+    console.error("Ошибка загрузки имени:", error);
+  }
+});
+</script>
+
 </body>
 </html>

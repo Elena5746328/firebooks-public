@@ -608,7 +608,7 @@ def api_book_detail(book_id: int):
 
 PAGES = {
     "/": "index.html",
-    "/catalog": "index.html",
+    "/catalog": "catalog.html",
     "/book": "book.html",
     "/cart": "cart.html",
     "/recommend": "recommend.html",
