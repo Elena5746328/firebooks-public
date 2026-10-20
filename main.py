@@ -618,6 +618,7 @@ PAGES = {
     "/orders": "orders.html",
     "/profile": "profile.html",
     "/checkout": "checkout.html",
+    "/info": "info.html",
 }
 
 def page_response(path: str):

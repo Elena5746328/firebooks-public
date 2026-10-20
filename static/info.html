@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Информация — FIREBOOKS</title>
+
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/firebooks_mobile_clean.css">
+
+<style>
+/* Стили только для информационной страницы */
+.info-page {
+  padding: 48px 0 80px;
+}
+
+.info-page__inner {
+  max-width: 1000px;
+}
+
+.info-page__back {
+  display: inline-block;
+  margin-bottom: 22px;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.info-page__title {
+  margin: 0 0 18px;
+  font-size: clamp(28px, 3.1vw, 40px);
+  line-height: 1.2;
+}
+
+.info-page__lead {
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0 0 34px;
+}
+
+.info-page__content {
+  max-width: 900px;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.info-page__content h2 {
+  font-size: 23px;
+  line-height: 1.35;
+  margin: 30px 0 14px;
+}
+
+.info-page__content p {
+  margin: 0 0 16px;
+}
+
+.info-page__content ul {
+  padding-left: 24px;
+  margin: 0 0 20px;
+}
+
+.info-page__content li {
+  margin-bottom: 9px;
+}
+
+.info-page__content a,
+.info-page__related a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.info-page__notice {
+  margin: 22px 0;
+  padding: 16px 18px;
+  border: 1px solid currentColor;
+  border-radius: 10px;
+  line-height: 1.65;
+}
+
+.info-page__content details {
+  border-bottom: 1px solid rgba(110, 80, 75, 0.25);
+  padding: 14px 0;
+}
+
+.info-page__content summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.info-page__content details p {
+  margin: 12px 0 2px;
+}
+
+.info-page__related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  padding-top: 26px;
+  margin-top: 36px;
+  border-top: 1px solid rgba(110, 80, 75, 0.25);
+}
+
+.info-page__section[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .info-page {
+    padding: 26px 0 50px;
+  }
+
+  .info-page__inner {
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+
+  .info-page__title {
+    font-size: 26px;
+  }
+
+  .info-page__lead {
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .info-page__content {
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+  }
+
+  .info-page__content h2 {
+    font-size: 19px;
+    margin: 24px 0 12px;
+  }
+
+  .info-page__notice {
+    padding: 12px 14px;
+  }
+
+  .info-page__related {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* FIREBOOKS — выравнивание информационных страниц */
+
+/* Общий контейнер */
+.info-page > .container.info-page__inner {
+  display: block !important;
+  width: calc(100% - 80px);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Ссылка назад — отдельной строкой */
+.info-page__back {
+  display: inline-block;
+  margin-bottom: 30px;
+}
+
+/* Каждый раздел занимает всю ширину */
+.info-page__section {
+  display: block;
+  width: 100%;
+  max-width: none;
+}
+
+/* Скрытые разделы остаются скрытыми */
+.info-page__section[hidden] {
+  display: none !important;
+}
+
+/* Заголовок и описание */
+.info-page__title,
+.info-page__lead {
+  width: 100%;
+  max-width: none;
+}
+
+/* Основной текст */
+.info-page__content {
+  display: block;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+/* Абзацы и списки */
+.info-page__content p,
+.info-page__content ul,
+.info-page__content details {
+  max-width: none;
+}
+
+/* Ссылки на другие разделы */
+.info-page__related {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Мобильная версия */
+@media (max-width: 768px) {
+  .info-page > .container.info-page__inner {
+    width: calc(100% - 32px);
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .info-page__back {
+    margin-bottom: 22px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ШАПКА -->
+<header class="header">
+  <div class="container header__inner">
+
+    <a href="/" class="logo">
+      <img
+        src="/static/img/Безымянный-1.png"
+        alt="FIREBOOKS"
+        class="logo__img"
+      >
+    </a>
+
+    <nav class="nav" aria-label="Основная навигация">
+      <ul class="nav__list">
+
+        <li class="nav__item">
+          <a href="/" class="nav__link">Каталог</a>
+        </li>
+
+        <li class="nav__item">
+          <a href="/library" class="nav__link">Мои книги</a>
+        </li>
+
+        <li class="nav__item">
+          <a href="/cart" class="nav__link">Корзина</a>
+        </li>
+
+        <li class="nav__item">
+          <a href="/orders" class="nav__link">Заказы</a>
+        </li>
+
+        <li class="nav__item user-dropdown">
+          <a
+            href="/profile"
+            class="nav__link nav__link--user"
+            id="user-menu"
+          >
+            <span class="user-name">Профиль</span>
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+
+    <form
+      class="search"
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <input
+        type="search"
+        name="q"
+        class="search__input"
+        placeholder="Поиск книг..."
+        aria-label="Поиск книг"
+      >
+
+      <button
+        type="submit"
+        class="search__btn"
+        aria-label="Найти"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        ><circle cx="11" cy="11" r="8"></circle>
+          <line
+            x1="21"
+            y1="21"
+            x2="16.65"
+            y2="16.65"
+          ></line>
+        </svg>
+      </button>
+    </form>
+
+  </div>
+</header>
+
+<!-- ОСНОВНАЯ ИНФОРМАЦИЯ -->
+<main class="info-page">
+  <div class="container info-page__inner">
+
+    <a class="info-page__back" href="/">
+      ← Вернуться в каталог
+    </a>
+
+    <!-- 1. О FIREBOOKS -->
+    <article
+      class="info-page__section"
+      id="info-about"
+      data-info-section="about"
+      hidden
+    >
+      <h1 class="info-page__title">О FIREBOOKS</h1>
+
+      <p class="info-page__lead">
+        Книжный магазин для тех, кто любит истории.
+      </p>
+
+      <div class="info-page__content">
+
+        <h2>Книги, к которым хочется возвращаться</h2>
+
+        <p>
+          FIREBOOKS — книжный интернет-магазин с подборками
+          современной прозы, фэнтези, классики, детективов
+          и других жанров. Мы хотим, чтобы поиск следующей
+          любимой книги был таким же увлекательным,
+          как само чтение.
+        </p>
+
+        <h2>Что можно найти в магазине</h2>
+
+        <p>
+          В каталоге представлены описания книг,
+          информация об изданиях, стоимость и отзывы
+          читателей. Понравившиеся книги можно сохранить
+          в закладки, а выбранные — добавить в корзину.
+        </p>
+
+        <h2>Как выбирать книги</h2>
+
+        <p>
+          Используйте поиск и каталог, знакомьтесь
+          с аннотациями и характеристиками изданий.
+          Если возникнут вопросы об оформлении заказа,
+          доставке или возврате, ответы собраны
+          в соответствующих разделах.
+        </p>
+
+      </div>
+    </article>
+
+    <!-- 2. ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ -->
+    <article
+      class="info-page__section"
+      id="info-privacy"
+      data-info-section="privacy"
+      hidden
+    >
+      <h1 class="info-page__title">
+        Политика конфиденциальности
+      </h1>
+
+      <p class="info-page__lead">
+        Как FIREBOOKS обращается с персональными данными.
+      </p>
+
+      <div class="info-page__content">
+
+        <div class="info-page__notice">
+          <strong>Для публикации официальной политики:</strong>
+          необходимо указать действительного оператора
+          персональных данных, его адрес и контакты,
+          уточнить перечень данных, сроки хранения,
+          правовые основания обработки и используемые сервисы.
+          Этот текст — основа для согласования,
+          а не готовый юридический документ.
+        </div>
+
+        <h2>1. Общие положения</h2>
+
+        <p>
+          FIREBOOKS уважает право посетителей
+          на конфиденциальность. Персональные данные
+          должны обрабатываться только для определённых,
+          законных целей и в объёме, необходимом
+          для работы магазина.
+        </p>
+
+        <h2>2. Какие сведения могут обрабатываться</h2>
+
+        <p>
+          В зависимости от используемых функций это могут
+          быть имя, контактные данные, сведения, введённые
+          при регистрации и оформлении заказа, а также
+          техническая информация, необходимая для работы сайта.
+        </p>
+
+        <h2>3. Для чего используются данные</h2>
+
+        <p>
+          Для предоставления доступа к личному кабинету,
+          обработки заказов, ответа на обращения,
+          обеспечения безопасности и выполнения
+          предусмотренных законом обязанностей.
+        </p>
+
+        <h2>4. Права пользователя</h2>
+
+        <p>
+          Пользователь может обратиться по вопросам обработки
+          своих данных, их уточнения или удаления в случаях,
+          предусмотренных законодательством.
+        </p>
+
+        <h2>5. Контакты оператора</h2>
+
+        <p>
+          <strong>Требуется заполнить:</strong>
+          наименование и реквизиты действительного оператора,
+          адрес для обращений и контактный адрес
+          электронной почты.
+        </p>
+
+      </div>
+    </article>
+
+    <!-- 3. ВАКАНСИИ -->
+    <article
+      class="info-page__section"
+      id="info-careers"
+      data-info-section="careers"
+      hidden
+    >
+      <h1 class="info-page__title">Вакансии</h1>
+
+      <p class="info-page__lead">
+        Работа с книгами и людьми, которые их любят.
+      </p>
+
+      <div class="info-page__content">
+
+        <h2>Работа в FIREBOOKS</h2>
+
+        <p>
+          В этом разделе размещается информация
+          об открытых вакансиях, требованиях
+          к кандидатам и условиях сотрудничества.
+        </p>
+
+        <h2>Актуальные предложения</h2>
+
+        <p>
+          Список открытых позиций будет опубликован
+          после утверждения вакансий.
+          Если объявлений пока нет, это не означает,
+          что магазин принимает заявки
+          на конкретную должность.
+        </p>
+
+        <h2>Как откликнуться</h2>
+
+        <p>
+          Контакты для откликов и порядок рассмотрения
+          резюме появятся вместе с вакансиями.
+          Не отправляйте персональные документы
+          через неофициальные каналы.
+        </p>
+
+      </div>
+    </article>
+
+    <!-- 4. ПРОГРАММА ЛОЯЛЬНОСТИ -->
+    <article
+      class="info-page__section"
+      id="info-loyalty"
+      data-info-section="loyalty"
+      hidden
+    >
+      <h1 class="info-page__title">
+        Программа лояльности
+      </h1>
+
+      <p class="info-page__lead">
+        Привилегии для постоянных читателей.
+      </p>
+
+      <div class="info-page__content">
+
+        <h2>Бонусы и специальные предложения</h2>
+
+        <p>
+          Здесь будут опубликованы действующие условия
+          программы лояльности FIREBOOKS:
+          порядок участия, начисления и использования
+          бонусов, ограничения и сроки действия предложений.
+        </p>
+
+        <h2>Как узнать о доступных предложениях</h2>
+
+        <p>
+          Актуальные скидки на отдельные книги
+          отображаются в каталоге и карточках товаров.
+          Скидка на книгу не означает автоматического
+          начисления бонусов.
+        </p>
+
+        <div class="info-page__notice">
+          <strong>Условия программы уточняются.</strong>
+          Пока не опубликованы правила начисления
+          и списания бонусов, программа лояльности
+          не считается подключённой.
+        </div>
+
+      </div>
+    </article>
+
+    <!-- 5. ПОДАРОЧНЫЕ СЕРТИФИКАТЫ -->
+    <article
+      class="info-page__section"
+      id="info-gift-cards"
+      data-info-section="gift-cards"
+      hidden
+    >
+      <h1 class="info-page__title">
+        Подарочные сертификаты
+      </h1>
+
+      <p class="info-page__lead">
+        Хорошая книга — отличный подарок.
+      </p>
+
+      <div class="info-page__content">
+
+        <h2>Подарите возможность выбрать историю</h2>
+
+        <p>
+          В этом разделе появятся доступные номиналы
+          подарочных сертификатов FIREBOOKS,
+          способы приобретения и правила использования.
+        </p>
+
+        <h2>Условия использования</h2>
+
+        <p>
+          До начала продаж сертификатов необходимо
+          опубликовать срок действия, порядок активации,
+          условия оплаты, использования остатка
+          и возврата денежных средств
+          в применимых случаях.
+        </p>
+
+        <div class="info-page__notice">
+          Сертификаты пока не доступны для покупки
+          через эту страницу. Здесь не производится
+          оплата и не выдаются коды.
+        </div>
+
+      </div>
+    </article>
+
+    <!-- 6. ОПЛАТА И ДОСТАВКА -->
+    <article
+      class="info-page__section"
+      id="info-delivery"
+      data-info-section="delivery"
+      hidden
+    >
+      <h1 class="info-page__title">
+        Оплата и доставка
+      </h1>
+
+      <p class="info-page__lead">
+        Важная информация перед оформлением заказа.
+      </p>
+
+      <div class="info-page__content">
+
+        <h2>Оформление заказа</h2>
+
+        <p>
+          Добавьте книги в корзину, проверьте состав заказа
+          и перейдите к оформлению. Перед подтверждением
+          заказа должны быть доступны итоговая стоимость,
+          состав покупки и выбранные условия получения.
+        </p>
+
+        <h2>Способы оплаты</h2>
+
+        <p>
+          Доступные способы оплаты и порядок списания средств
+          указываются при оформлении заказа.
+          Если выбранный способ не подключён,
+          он не должен отображаться как доступный к оплате.
+        </p>
+
+        <h2>Доставка</h2>
+
+        <p>
+          Варианты доставки, стоимость и ориентировочные
+          сроки зависят от адреса и выбранного способа
+          получения. Конкретные условия необходимо
+          показывать покупателю до подтверждения заказа.
+        </p>
+
+        <h2>Получение заказа</h2>
+
+        <p>
+          При получении проверьте комплектность заказа
+          и состояние упаковки. Если обнаружено
+          несоответствие, обратитесь в поддержку магазина.
+        </p>
+
+        <div class="info-page__notice">
+          <strong>Перед запуском продаж:</strong>
+          добавьте фактически подключённые способы оплаты
+          и доставки, регионы обслуживания, тарифы и сроки.
+          Пока эти сведения не утверждены,
+          страница не обещает конкретных услуг.
+        </div>
+
+      </div>
+    </article>
+
+    <!-- 7. ПРАВИЛА ВОЗВРАТА -->
+    <article
+      class="info-page__section"
+      id="info-returns"
+      data-info-section="returns"
+      hidden
+    >
+      <h1 class="info-page__title">
+        Правила возврата
+      </h1>
+
+      <p class="info-page__lead">
+        Информация о возврате и обмене книг.
+      </p>
+
+      <div class="info-page__content">
+
+        <h2>Если книга не подошла</h2>
+
+        <p>
+          Условия возврата зависят от способа покупки,
+          состояния товара и причины обращения.
+          Для дистанционной продажи действуют специальные
+          правила законодательства Российской Федерации
+          о защите прав потребителей.
+        </p>
+
+        <h2>Если товар повреждён или отличается от заказа</h2>
+
+        <p>
+          Сохраните сведения о заказе и опишите проблему
+          при обращении в поддержку. Магазин должен
+          рассмотреть требование покупателя в порядке,
+          предусмотренном законодательством.
+        </p>
+
+        <h2>Как обратиться</h2>
+
+        <p>
+          Подготовьте номер заказа, наименование книги
+          и описание ситуации. Контакты для обращений
+          должны быть опубликованы в разделе
+          «Контакты и реквизиты».
+        </p>
+
+        <h2>Возврат денежных средств</h2>
+
+        <p>
+          Порядок и сроки возврата определяются применимыми
+          нормами закона и обстоятельствами покупки.
+          Перед публикацией окончательных правил магазин
+          должен уточнить процедуру подачи заявления
+          и адрес возврата.
+        </p>
+
+        <div class="info-page__notice">
+          Этот раздел требует проверки перед запуском
+          реальных продаж. Нельзя автоматически переносить
+          правила возврата книг из обычного магазина
+          на дистанционные покупки.
+        </div>
+
+      </div>
+    </article>
+
+    <!-- 8. КОНТАКТЫ И РЕКВИЗИТЫ -->
+    <article
+      class="info-page__section"
+      id="info-contacts"
+      data-info-section="contacts"
+      hidden
+    >
+      <h1 class="info-page__title">
+        Контакты и реквизиты
+      </h1>
+
+      <p class="info-page__lead">
+        Как связаться с FIREBOOKS.
+      </p>
+
+      <div class="info-page__content">
+
+        <h2>Контакты магазина</h2>
+
+        <p>
+          Здесь должны быть опубликованы действующие
+          контакты для вопросов о заказах, оплате,
+          доставке, возврате и сотрудничестве.
+        </p>
+
+        <ul>
+          <li>
+            <strong>Электронная почта:</strong>
+            требуется указать действующий адрес.
+          </li>
+
+          <li>
+            <strong>Телефон:</strong>
+            требуется указать номер, если используется.
+          </li>
+
+          <li>
+            <strong>Время работы поддержки:</strong>
+            требуется уточнить.
+          </li>
+        </ul>
+
+        <h2>Юридическаяинформация</h2>
+
+        <p>
+          Для реального магазина необходимо указать
+          достоверные сведения о продавце:
+          официальное наименование, адрес, ИНН
+          и другие обязательные реквизиты
+          в зависимости от формы деятельности.
+        </p>
+
+        <div class="info-page__notice">
+          <strong>Важно:</strong>
+          указанное в текущем подвале ООО «ГРАМОТА»
+          нужно подтвердить до публикации
+          как юридического лица магазина.
+          Реквизиты не подставлены без проверки.
+        </div>
+
+      </div>
+    </article>
+
+    <!-- 9. ПОМОЩЬ И ОТВЕТЫ НА ВОПРОСЫ -->
+    <article
+      class="info-page__section"
+      id="info-faq"
+      data-info-section="faq"
+      hidden
+    >
+      <h1 class="info-page__title">
+        Помощь и ответы на вопросы
+      </h1>
+
+      <p class="info-page__lead">
+        Ответы на частые вопросы покупателей.
+      </p>
+
+      <div class="info-page__content">
+
+        <h2>Частые вопросы</h2>
+
+        <details>
+          <summary>Как найти нужную книгу?</summary>
+          <p>
+            Используйте строку поиска или перейдите
+            в каталог. В карточке книги можно посмотреть
+            описание, характеристики и цену.
+          </p>
+        </details>
+
+        <details>
+          <summary>Как добавить книгу в закладки?</summary>
+          <p>
+            Нажмите на значок сердечка в карточке книги.
+            Сохранённые издания можно найти
+            в разделе «Закладки» личного кабинета.
+          </p>
+        </details>
+
+        <details>
+          <summary>Где посмотреть корзину?</summary>
+          <p>
+            Перейдите в раздел «Корзина» через верхнее меню.
+            Там можно проверить выбранные книги
+            перед оформлением.
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            Где узнать о доставке и оплате?
+          </summary>
+          <p>
+            Основная информация собрана в разделе
+            <a href="/info?section=delivery">
+              «Оплата и доставка»
+            </a>.
+            Конкретные условия должны быть указаны
+            при оформлении заказа.
+          </p>
+        </details>
+
+        <details>
+          <summary>Как узнать правила возврата?</summary>
+          <p>
+            Откройте раздел
+            <a href="/info?section=returns">
+              «Правила возврата»
+            </a>.
+            Для обращения по конкретному заказу
+            понадобятся его данные.
+          </p>
+        </details>
+
+        <details>
+          <summary>Как связаться с магазином?</summary>
+          <p>
+            Действующие способы связи должны быть
+            размещены в разделе
+            <a href="/info?section=contacts">
+              «Контакты и реквизиты»
+            </a>.
+          </p>
+        </details>
+
+      </div>
+    </article>
+
+    <!-- 10. ОБРАТНАЯ СВЯЗЬ -->
+    <article
+      class="info-page__section"
+      id="info-feedback"
+      data-info-section="feedback"
+      hidden
+    >
+      <h1 class="info-page__title">
+        Обратная связь
+      </h1>
+
+      <p class="info-page__lead">
+        Вопросы, предложения и обращения.
+      </p>
+
+      <div class="info-page__content">
+
+        <h2>Как направить обращение</h2>
+
+        <p>
+          Если у вас возник вопрос по заказу,
+          доставке, возврату или работе сайта,
+          свяжитесь с FIREBOOKS по официальным контактам,
+          опубликованным в разделе
+          <a href="/info?section=contacts">
+            «Контакты и реквизиты»
+          </a>.
+        </p>
+
+        <h2>Что указать в сообщении</h2>
+
+        <ul>
+          <li>
+            Тему обращения и краткое описание вопроса.
+          </li>
+          <li>
+            Номер заказа, если вопрос касается покупки.
+          </li>
+          <li>
+            Способ связи, по которому удобно получить ответ.
+          </li>
+        </ul>
+
+        <h2>Форма обратной связи</h2>
+
+        <p>
+          Онлайн-форма будет доступна после подключениябезопасной обработки обращений на сервере.
+          До этого момента страница не имитирует
+          отправку сообщений.
+        </p>
+
+        <div class="info-page__notice">
+          Для запуска формы потребуется настроить
+          серверный обработчик, защиту от спама
+          и правила хранения обращений.
+          Просто добавить кнопку «Отправить» недостаточно.
+        </div>
+
+      </div>
+    </article>
+
+    <!-- ЕСЛИ РАЗДЕЛ НЕ НАЙДЕН -->
+    <article id="info-not-found" hidden>
+      <h1 class="info-page__title">
+        Раздел не найден
+      </h1>
+      <p>
+        Проверьте адрес страницы или вернитесь в каталог.
+      </p>
+    </article>
+
+    <!-- БЫСТРЫЕ ССЫЛКИ -->
+    <nav
+      class="info-page__related"
+      aria-label="Другие разделы"
+    >
+      <a href="/info?section=delivery">
+        Оплата и доставка
+      </a>
+
+      <a href="/info?section=returns">
+        Правила возврата
+      </a>
+
+      <a href="/info?section=faq">
+        Помощь
+      </a>
+
+      <a href="/info?section=contacts">
+        Контакты
+      </a>
+    </nav>
+
+  </div>
+</main>
+
+<!-- ПОДВАЛ -->
+<footer class="footer">
+  <div class="container footer__inner">
+
+    <div class="footer__col">
+      <h3 class="footer__heading">О компании</h3>
+
+      <ul class="footer__list">
+        <li>
+          <a href="#">О FIREBOOKS</a>
+        </li>
+        <li>
+          <a href="#">Политика конфиденциальности</a>
+        </li>
+        <li>
+          <a href="#">Вакансии</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Покупателям</h3>
+
+      <ul class="footer__list">
+        <li>
+          <a href="#">Программа лояльности</a>
+        </li>
+        <li>
+          <a href="#">Подарочные сертификаты</a>
+        </li>
+        <li>
+          <a href="#">Оплата и доставка</a>
+        </li>
+        <li>
+          <a href="#">Правила возврата</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <h3 class="footer__heading">Контакты</h3>
+
+      <ul class="footer__list">
+        <li>
+          <a href="#">Контакты и реквизиты</a>
+        </li>
+        <li>
+          <a href="#">Помощь и ответы на вопросы</a>
+        </li>
+        <li>
+          <a href="#">Обратная связь</a>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="container footer__bottom">
+
+    <div class="footer__socials">
+      <a href="#" class="social" aria-label="VK">VK</a>
+      <a href="#" class="social" aria-label="Telegram">TG</a>
+      <a href="#" class="social" aria-label="TikTok">TT</a>
+      <a href="#" class="social" aria-label="YouTube">YT</a>
+    </div>
+
+    <p class="footer__copyright">
+      2024–2026, ООО «ГРАМОТА»
+      На информационном ресурсе применяются
+      рекомендательные технологии
+    </p>
+
+  </div>
+</footer>
+
+<!-- СКРИПТ ССЫЛОК ПОДВАЛА -->
+<script src="/static/firebooks_footer_links.js"></script>
+
+<!-- ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ -->
+<script>
+(() => {
+  "use strict";
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  const requested = params.get("section") || "about";
+
+  const sections = [
+    ...document.querySelectorAll("[data-info-section]")
+  ];
+
+  const current = sections.find(
+    el => el.dataset.infoSection === requested
+  );
+
+  if (!current) {
+    document.title = "Раздел не найден — FIREBOOKS";
+
+    const error = document.getElementById(
+      "info-not-found"
+    );
+
+    if (error) {
+      error.hidden = false;
+    }
+  } else {
+    current.hidden = false;
+
+    const heading = current.querySelector("h1");
+
+    document.title =
+      `${heading.textContent.trim()} — FIREBOOKS`;
+  }
+
+  const userName = localStorage.getItem(
+    "firebooks_user_name"
+  );
+
+  const nameElement = document.querySelector(
+    ".user-name"
+  );
+
+  if (nameElement) {
+    nameElement.textContent = userName || "Профиль";
+  }
+})();
+</script>
+
+</body>
+</html>
