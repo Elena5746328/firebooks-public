@@ -152,6 +152,56 @@
       flex-direction: column;
     }
   }
+
+  /* Компактный каталог на телефоне */
+@media (max-width: 768px) {
+  .catalog-page {
+    padding: 24px 0 45px;
+  }
+
+  .catalog-heading {
+    margin-bottom: 20px;
+  }
+
+  .catalog-heading h1 {
+    font-size: 29px;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .catalog-heading > p:last-child {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .catalog-toolbar {
+    padding: 12px;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .catalog-search input {
+    height: 40px;
+    font-size: 13px;
+  }
+
+  .catalog-filters select {
+    height: 42px;
+    font-size: 13px;
+  }
+
+  .catalog-results {
+    margin-bottom: 16px;
+  }
+
+  .catalog-results h2 {
+    font-size: 22px;
+  }
+
+  #catalog-count {
+    font-size: 12px;
+  }
+}
 </style>
 </head>
 <body>
@@ -341,5 +391,6 @@
 <script src="/static/script.js"></script>
 <script src="/static/auth_frontend.js"></script>
 <script src="/static/catalog.js"></script>
+<script src="/static/firebooks_footer_links.js"></script>
 </body>
 </html>
