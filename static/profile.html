@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="/static/cabinet.css">
   <link rel="stylesheet" href="/static/firebooks_cabinet_mobile.css">
+  <link rel="stylesheet" href="/static/firebooks_profile_preview.css">
+
 </head>
 <body>
 <header class="header">
@@ -87,14 +89,61 @@
           <div class="loyalty-card__right"><div class="loyalty-card__stat"><p class="loyalty-card__stat-value">—</p><p class="loyalty-card__stat-label">Процент начисления за покупки</p></div><div class="loyalty-card__stat"><p class="loyalty-card__stat-value">—</p><p class="loyalty-card__stat-label">Сумма подтверждённых покупок</p></div></div>
         </div>
       </div>
+      <!-- АКТИВНЫЕ ЗАКАЗЫ -->
       <div class="profile__section">
-        <div class="section-head"><h2 class="section-title">Активные заказы</h2><a href="/orders" class="section-all">Смотреть все →</a></div>
-        <div id="profile-active-orders" class="profile__empty"><p class="profile__empty-text">Активные заказы пока не отображаются. Посмотрите раздел «Заказы».</p></div>
+        <div class="section-head">
+          <h2 class="section-title">
+            Активные заказы
+            <span id="profile-orders-count"></span>
+          </h2>
+          <a href="/orders" class="section-all">
+            История заказов →
+          </a>
+        </div>
+
+        <div id="profile-active-orders"
+            class="profile-preview"
+            aria-live="polite">
+          <p class="profile__empty-text">
+            Загружаем ваши заказы...
+          </p>
+        </div>
       </div>
-      <div class="profile__section"><h2 class="profile__heading">Активные бронирования</h2><div class="profile__empty"><p class="profile__empty-text">У вас пока нет активных бронирований</p></div></div>
+
+      <!-- АКТИВНЫЕ БРОНИРОВАНИЯ -->
       <div class="profile__section">
-        <div class="section-head"><h2 class="section-title">Закладки</h2><a href="/bookmarks" class="section-all">Смотреть все →</a></div>
-        <div class="profile__empty"><p class="profile__empty-text">Ваши сохранённые книги находятся в разделе «Закладки».</p></div>
+        <h2 class="profile__heading">
+          Активные бронирования
+        </h2>
+
+        <div class="profile__empty">
+          <p class="profile__empty-text">
+            Бронирование книг пока находится
+            в разработке.
+          </p>
+        </div>
+      </div>
+
+      <!-- ЗАКЛАДКИ -->
+      <div class="profile__section">
+        <div class="section-head">
+          <h2 class="section-title">
+            Закладки
+            <span id="profile-bookmarks-count"></span>
+          </h2>
+
+          <a href="/bookmarks" class="section-all">
+            Открыть закладки →
+          </a>
+        </div>
+
+        <div id="profile-bookmarks"
+            class="profile-preview"
+            aria-live="polite">
+          <p class="profile__empty-text">
+            Загружаем ваши книги...
+          </p>
+        </div>
       </div>
     </main>
   </div>
@@ -105,13 +154,15 @@
     <div class="footer__col"><h3 class="footer__heading">Покупателям</h3><ul class="footer__list"><li><a href="#">Программа лояльности</a></li><li><a href="#">Подарочные сертификаты</a></li><li><a href="#">Оплата и доставка</a></li><li><a href="#">Правила возврата</a></li></ul></div>
     <div class="footer__col"><h3 class="footer__heading">Контакты</h3><ul class="footer__list"><li><a href="#">Контакты и реквизиты</a></li><li><a href="#">Помощь и ответы на вопросы</a></li><li><a href="#">Обратная связь</a></li></ul></div>
   </div>
-  <div class="container footer__bottom"><div class="footer__socials"><a href="#" class="social" aria-label="VK">VK</a><a href="#" class="social" aria-label="Telegram">TG</a><a href="#" class="social" aria-label="TikTok">TT</a><a href="#" class="social" aria-label="YouTube">YT</a></div><p class="footer__copyright">2024–2026, ООО «ГРАМОТА» <a href="/recommend" class="footer__recommend-link">На информационном ресурсе применяются рекомендательные технологии</a></p></div>
+  <div class="container footer__bottom"><div class="footer__socials"><a href="#" class="social" aria-label="VK">VK</a><a href="#" class="social" aria-label="Telegram">TG</a><a href="#" class="social" aria-label="TikTok">TT</a><a href="#" class="social" aria-label="YouTube">YT</a></div><p class="footer__copyright">2024–2026, FIREBOOKS <a href="/recommend" class="footer__recommend-link">На информационном ресурсе применяются рекомендательные технологии</a></p></div>
 </footer>
-<script src="/static/script.js"></script>
+
 <script src="/static/script.js"></script>
 <script src="/static/auth_frontend.js"></script>
 <script src="/static/cabinet.js"></script>
 <script src="/static/firebooks_cabinet_menu.js"></script>
 <script src="/static/firebooks_footer_links.js"></script>
+<script src="/static/firebooks_loyalty.js"></script>
+<script src="/static/firebooks_profile_stats.js"></script>
 </body>
 </html>

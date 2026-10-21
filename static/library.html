@@ -263,16 +263,16 @@
         </a>
 
         <a href="/my-reviews" class="sidebar__item">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 2 0 012-2h14a2 2 0 012 2z"/>
-          </svg>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
 
           <span class="sidebar__label">Мои отзывы</span>
           <span class="sidebar__badge" id="reviews-count">0</span>
@@ -356,7 +356,7 @@
     </div>
 
     <p class="footer__copyright">
-      2024–2026, ООО «ГРАМОТА»
+      2024–2026, FIREBOOKS
       <a href="/recommend" class="footer__recommend-link">
         На информационном ресурсе применяются
         рекомендательные технологии
@@ -486,6 +486,8 @@
 
   let currentBook = null;
   let selectedRating = 0;
+  let purchasedBooks = [];
+  let libraryLoadVersion = 0;
 
   function readArray(key) {
     try {
@@ -542,24 +544,80 @@
   }
 
   function getPurchasedBooks() {
-    const orders = readArray(ORDERS_KEY);
-    const books = new Map();
+    return purchasedBooks;
+  }
 
-    orders.forEach(order => {
-      if (!order || !Array.isArray(order.items)) {
+  async function loadPurchasedBooks() {
+    const version = ++libraryLoadVersion;
+    const emptyText = empty.querySelector("p");
+
+    // Пока сервер отвечает, не показываем
+    // ошибочное сообщение о пустой библиотеке.
+    grid.replaceChildren();
+    empty.hidden = false;
+
+    if (emptyText) {
+      emptyText.textContent =
+        "Загружаем вашу библиотеку...";
+    }
+
+    try {
+      const response = await fetch("/api/orders", {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+
+      // Пользователь вышел из аккаунта.
+      if (response.status === 401) {
+        if (version !== libraryLoadVersion) return;
+
+        purchasedBooks = [];
+
+        updateCounters();
+        renderLibrary();
+
+        if (emptyText) {
+          emptyText.textContent =
+            "Войдите в аккаунт, чтобы увидеть свои книги.";
+        }
+
         return;
       }
 
-      order.items.forEach(item => {
-        if (!item || !item.title) return;
+      if (!response.ok) {
+        throw new Error(
+          "Не удалось получить заказы: " +
+          response.status
+        );
+      }
 
-        const id = bookId(item);
+      const data = await response.json();
 
-        // Для старых записей без ID используем название
-        // как временный ключ только для отображения.
-        const key = id || "title:" + String(item.title);
+      if (version !== libraryLoadVersion) return;
 
-        if (!books.has(key)) {
+      const orders = Array.isArray(data.orders)
+        ? data.orders
+        : [];
+
+      const books = new Map();
+
+      orders.forEach(order => {
+        if (!Array.isArray(order.items)) return;
+
+        order.items.forEach(item => {
+          if (!item || !item.title) return;
+
+          const id = String(
+            item.id ?? item.book_id ?? ""
+          ).trim();
+
+          // Одну и ту же книгу из нескольких
+          // заказов показываем только один раз.
+          const key = id ||
+            "title:" + String(item.title);
+
+          if (books.has(key)) return;
+
           books.set(key, {
             id: id || null,
             title: String(item.title),
@@ -567,15 +625,43 @@
             cover: String(
               item.cover || item.cover_url || ""
             ),
-            price: priceNumber(
-              item.price ?? item.priceText
-            )
+            price: priceNumber(item.price)
           });
-        }
+        });
       });
-    });
 
-    return Array.from(books.values());
+      purchasedBooks = Array.from(books.values());
+
+      if (emptyText) {
+        emptyText.textContent =
+          "В вашей библиотеке пока нет книг.";
+      }
+
+      updateCounters();
+      renderLibrary();
+
+      // Сообщаем общему меню, что данные обновились.
+      document.dispatchEvent(
+        new Event("firebooks:counts-changed")
+      );
+
+    } catch (error) {
+      if (version !== libraryLoadVersion) return;
+
+      console.error(
+        "FIREBOOKS: ошибка загрузки библиотеки",
+        error
+      );
+
+      grid.replaceChildren();
+      empty.hidden = false;
+
+      if (emptyText) {
+        emptyText.textContent =
+          "Не удалось загрузить библиотеку. " +
+          "Попробуйте обновить страницу.";
+      }
+    }
   }
 
   function favoriteIds() {
@@ -1055,9 +1141,10 @@
     renderLibrary();
   });
 
+// Обновляем закладки и отзывы,
+  // если данные изменились в другой вкладке.
   window.addEventListener("storage", event => {
     if (
-      event.key === ORDERS_KEY ||
       event.key === FAVORITES_KEY ||
       event.key === REVIEWS_KEY
     ) {
@@ -1066,9 +1153,32 @@
     }
   });
 
+  // После входа или выхода из аккаунта
+  // заново загружаем книги с сервера.
+  document.addEventListener(
+    "firebooks:auth-changed",
+    () => {
+      updateProfile();
+      loadPurchasedBooks();
+    }
+  );
+
+  // Когда пользователь возвращается на вкладку,
+  // обновляем библиотеку.
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+      if (!document.hidden) {
+        loadPurchasedBooks();
+      }
+    }
+  );
+
+  // Первоначальная загрузка профиля
+  // и книг из базы данных.
   updateProfile();
-  updateCounters();
-  renderLibrary();
+  loadPurchasedBooks();
+
 })();
 </script>
 
