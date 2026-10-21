@@ -1,0 +1,231 @@
+/* FIREBOOKS — книги и заказы в профиле */
+
+.profile-preview {
+  width: 100%;
+  min-width: 0;
+}
+
+.profile-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.profile-preview__book {
+  display: block;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.profile-preview__book-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f2f2f2;
+}
+
+.profile-preview__book-cover img,
+.profile-preview__order-cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-preview__cover-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 28px;
+}
+
+.profile-preview__book-info {
+  padding-top: 9px;
+}
+
+.profile-preview__book-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.profile-preview__book-author {
+  margin: 5px 0 0;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.profile-preview__book-price {
+  margin: 7px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.profile-preview__orders {
+  display: grid;
+  gap: 14px;
+}
+
+.profile-preview__order {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+}
+
+.profile-preview__order-header,
+.profile-preview__order-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-preview__order-heading {
+  display: grid;
+  gap: 5px;
+}
+
+.profile-preview__order-number {
+  font-size: 15px;
+}
+
+.profile-preview__order-date {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.profile-preview__order-status {
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #f1f1f1;
+  font-size: 12px;
+  text-align: center;
+}
+
+.profile-preview__order-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.profile-preview__order-book {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 200px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.profile-preview__order-cover {
+  position: relative;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #f2f2f2;
+}
+
+.profile-preview__order-book-info {
+  min-width: 0;
+}
+
+.profile-preview__order-book-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.profile-preview__order-book-detail {
+  margin: 6px 0 0;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.profile-preview__order-footer {
+  padding-top: 12px;
+  border-top: 1px solid #ededed;
+  font-size: 14px;
+}
+
+.profile-preview__more {
+  display: block;
+  margin: 18px auto 0;
+  padding: 10px 18px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.profile-preview__more:hover {
+  background: rgba(128, 128, 128, 0.07);
+}
+
+.profile-preview__book:hover,
+.profile-preview__order-book:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 760px) {
+  .profile-preview__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .profile-preview__order {
+    padding: 12px;
+  }
+
+  .profile-preview__order-header {
+    align-items: flex-start;
+  }
+
+  .profile-preview__order-status {
+    flex-shrink: 0;
+    max-width: 45%;
+  }
+}
+
+/* Компактные закладки в профиле */
+
+.profile-preview__grid {
+  grid-template-columns: repeat(4, 150px);
+  justify-content: start;
+  gap: 18px;
+}
+
+.profile-preview__book {
+  width: 150px;
+  max-width: 100%;
+}
+
+.profile-preview__book-cover {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+}
+
+@media (max-width: 760px) {
+  .profile-preview__grid {
+    grid-template-columns: repeat(2, minmax(0, 150px));
+    gap: 12px;
+  }
+
+  .profile-preview__book {
+    width: 100%;
+  }
+}

@@ -127,6 +127,23 @@ def init_db():
                     f"ALTER TABLE orders ADD COLUMN {column} {definition}"
                 )
 
+        # Бонусы за оформленные заказы
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS loyalty_awards (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                order_id INTEGER NOT NULL UNIQUE,
+                points INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+                FOREIGN KEY (user_id)
+                    REFERENCES users(id) ON DELETE CASCADE,
+
+                FOREIGN KEY (order_id)
+                    REFERENCES orders(id) ON DELETE CASCADE
+            )
+        """)
+
 def seed_books(books):
     """
     Добавляет только отсутствующие книги.

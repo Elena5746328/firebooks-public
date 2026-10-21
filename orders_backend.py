@@ -194,6 +194,26 @@ def create_order(data: OrderInput, request: Request):
                 [user["id"], *book_ids]
             )
 
+            # 5% бонусами от стоимости книг
+            # Доставка в начислении не участвует
+            bonus_earned = subtotal * 5 // 100
+
+            conn.execute(
+                """
+                INSERT INTO loyalty_awards (
+                    user_id,
+                    order_id,
+                    points
+                )
+                VALUES (?, ?, ?)
+                """,
+                (
+                    user["id"],
+                    order_id,
+                    bonus_earned
+                )
+            )
+
             conn.commit()
 
         except Exception:
@@ -206,7 +226,8 @@ def create_order(data: OrderInput, request: Request):
         "number": f"FB-{order_id:06d}",
         "subtotal": subtotal,
         "delivery_price": delivery_price,
-        "total": total
+        "total": total,
+        "bonus_earned": bonus_earned,
     }
 
 @router.get("")
@@ -277,3 +298,37 @@ def list_orders(request: Request):
             })
 
     return {"orders": result}
+
+@router.get("/loyalty")
+def get_loyalty(request: Request):
+    user = require_user(request)
+
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT
+                COALESCE(SUM(l.points), 0)
+                    AS balance,
+
+                COALESCE(
+                    SUM(o.total - o.delivery_price),
+                    0
+                ) AS purchases_total
+
+            FROM loyalty_awards AS l
+
+            JOIN orders AS o
+                ON o.id = l.order_id
+
+            WHERE l.user_id = ?
+            """,
+            (user["id"],)
+        ).fetchone()
+
+    return {
+        "balance": int(row["balance"]),
+        "percent": 5,
+        "purchases_total": int(
+            row["purchases_total"]
+        )
+    }

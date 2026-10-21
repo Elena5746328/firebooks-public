@@ -3503,3 +3503,40 @@ img { max-width: 100%; display: block; }
   .footer__copyright { text-align: left; overflow-wrap: anywhere; }
   .footer__socials { flex-wrap: wrap; }
 }
+
+.footer__recommend-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.footer__recommend-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footer__recommend-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* FIREBOOKS — иконки социальных сетей */
+
+.footer__socials .social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.footer__socials .social svg {
+  display: block;
+  width: 21px;
+  height: 21px;
+  fill: currentColor;
+  transition: transform 0.2s ease;
+}
+
+.footer__socials .social:hover svg {
+  transform: scale(1.1);
+}

@@ -186,7 +186,7 @@
   }
 
   function updateLocalCounts() {
-    const purchased = newSet();
+    const purchased = new Set();
 
     readArray("firebooks_orders").forEach(order => {
       if (!Array.isArray(order?.items)) return;
