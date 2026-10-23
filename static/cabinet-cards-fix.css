@@ -1,0 +1,100 @@
+/* ======================================
+   FIREBOOKS — КОМПАКТНЫЕ КАРТОЧКИ
+   ЗАКЛАДКИ И МОИ ОТЗЫВЫ
+   ====================================== */
+
+/* ЗАКЛАДКИ */
+
+#bookmarks-grid {
+  display: grid !important;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+#bookmarks-grid > .cabinet__card,
+#bookmarks-grid .book-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#bookmarks-grid .book-card__cover img {
+  object-fit: contain;
+  background: #f8f5f0;
+}
+
+#bookmarks-grid .book-card__info {
+  padding: 12px;
+}
+
+/* МОИ ОТЗЫВЫ */
+
+/* У отзывов чуть шире карточки,
+   чтобы текст оставался удобным для чтения */
+
+#reviews-grid {
+  display: grid !important;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+#reviews-grid > .cabinet__card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Уменьшаем именно обложку */
+
+#reviews-grid .book-card__cover {
+  width: min(100%, 190px);
+  margin: 12px auto 0;
+  aspect-ratio: 3 / 4;
+}
+
+#reviews-grid .book-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#reviews-grid .book-card__info {
+  padding: 12px;
+}
+
+/* АДАПТИВНОСТЬ */
+
+@media (max-width: 1399px) {
+  #bookmarks-grid {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1000px) {
+  #bookmarks-grid,
+  #reviews-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  #bookmarks-grid,
+  #reviews-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  #reviews-grid .book-card__cover {
+    width: min(100%, 150px);
+  }
+}
+
+@media (max-width: 360px) {
+  #bookmarks-grid,
+  #reviews-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

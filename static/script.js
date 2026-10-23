@@ -264,7 +264,7 @@ async function loadHero() {
     }
 
     if (teaserTitle) {
-      teaserTitle.textContent = slide.teaserTitle;
+      teaserTitle.textContent =slide.teaserTitle;
     }
 
     if (teaserFirst) {
@@ -893,7 +893,7 @@ function initToggleButtons() {
 
     button.dataset.toggleReady = "true";
 
-    const clampClass = "review-block__text--clamped";
+    const clampClass= "review-block__text--clamped";
 
     if (text.classList.contains(clampClass)) {
       if (text.scrollHeight <= text.clientHeight + 2) {
@@ -1173,8 +1173,7 @@ function initCart() {
         cover: cover?.getAttribute("src") || "",
         title: title?.textContent.trim() || "",
         author: author?.textContent.trim() || "",
-        price: amount,
-        priceText: formatPrice(amount),
+        price: amount,priceText: formatPrice(amount),
         quantity: Math.max(1, Number(quantity?.value) || 1)
       });
     });
@@ -1184,99 +1183,243 @@ function initCart() {
       return;
     }
 
-    writeStorage("firebooks_checkout", items);window.location.href = "/checkout";
+    writeStorage("firebooks_checkout", items);
+    window.location.href = "/checkout";
   });
 
   syncSelectAll();
   updateCartTotal();
 }
 
-// ─── Поиск книг ──────────────────────────────────────────────
+// ─── Поиск книг с живыми подсказками ─────────────────────────
 
 function initSearch() {
-  const input = document.querySelector(".search__input");
-  if (!input) return;
+  const selector = ".search__input";
+  const initializedInputs = new WeakSet();
+  let catalogPromise = null;
 
-  // Поле поиска больше не заполнено заранее.
-  input.removeAttribute("value");
-  input.value = "";
-
-  const form = input.closest("form");
-  if (!form) return;
-
-  form.style.position = "relative";
-
-  const suggestions = document.createElement("div");
-  suggestions.className = "search-suggest";
-  suggestions.style.display = "none";
-  form.appendChild(suggestions);
-
-  let timer = null;
-  let requestController = null;
-
-  function hideSuggestions() {
-    suggestions.style.display = "none";
+  // Ищем по всему каталогу: это позволяет находить книги независимо
+  // от регистра русских букв и написания «е»/«ё».
+  function normalizeSearch(value) {
+    return String(value ?? "")
+      .toLocaleLowerCase("ru")
+      .replace(/ё/g, "е")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
-  function showMessage(message) {
-    suggestions.replaceChildren();
-
-    const element = document.createElement("div");
-    element.className = "search-suggest__empty";
-    element.textContent = message;
-
-    suggestions.appendChild(element);
-    suggestions.style.display = "block";
+  function getCatalog() {
+    if (!catalogPromise) {
+      catalogPromise = fetch(`${API}/books`, {
+        credentials: "same-origin"
+      }).then(async response => {
+        if (!response.ok) {
+          throw new Error(`Ошибка каталога: ${response.status}`);
+        }
+        const books = await response.json();
+        if (!Array.isArray(books)) {
+          throw new Error("Каталог вернул неверный формат данных");
+        }
+        return books;
+      }).catch(error => {
+        catalogPromise = null; // разрешаем повторную попытку
+        throw error;
+      });
+    }
+    return catalogPromise;
   }
 
-  async function searchBooks(query) {
-    requestController?.abort();
-    requestController = new AbortController();
-
-    try {
-      const response = await fetch(
-        `${API}/search?q=${encodeURIComponent(query)}`,
-        { signal: requestController.signal }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Ошибка поиска: ${response.status}`);
+  // Стили касаются только выпадающих подсказок, а не шапки сайта.
+  if (!document.getElementById("firebooks-live-search-style")) {
+    const style = document.createElement("style");
+    style.id = "firebooks-live-search-style";
+    style.textContent = `
+      .search-suggest.search-suggest--live {
+        position: fixed !important;
+        z-index: 2147483000 !important;
+        box-sizing: border-box;
+        background: #fffdf9;
+        color: #342c27;
+        border: 1px solid #e9e0d6;
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(39, 29, 20, .16);
+        padding: 5px;
+        max-height: min(55vh, 420px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        font-family: inherit;
       }
+      .search-suggest--live .search-suggest__item {
+        display: flex !important;
+        width: 100%;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 10px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        box-sizing: border-box;
+      }
+      .search-suggest--live .search-suggest__item:hover,
+      .search-suggest--live .search-suggest__item:focus-visible,
+      .search-suggest--live .search-suggest__item.is-active {
+        background: #f4eee7;
+        outline: none;
+      }
+      .search-suggest--live .search-suggest__cover {
+        display: block;
+        width: 42px;
+        height: 58px;
+        object-fit: cover;
+        border-radius: 4px;
+        flex: 0 0 42px;
+      }
+      .search-suggest--live .search-suggest__info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        gap: 3px;
+      }
+      .search-suggest--live .search-suggest__title,
+      .search-suggest--live .search-suggest__author,
+      .search-suggest--live .search-suggest__price {
+        margin: 0;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+      .search-suggest--live .search-suggest__title {
+        font-size: 14px;
+        font-weight: 650;
+      }
+      .search-suggest--live .search-suggest__author {
+        font-size: 12px;
+        opacity: .72;
+      }
+      .search-suggest--live .search-suggest__price {
+        font-size: 13px;
+        font-weight: 650;
+      }
+      .search-suggest--live .search-suggest__empty {
+        padding: 13px 12px;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
-      const books = await response.json();
+  function setupSearchInput(input){
+    if (!input || initializedInputs.has(input)) return;
+    initializedInputs.add(input);
 
-      if (input.value.trim() !== query) return;
+    const form = input.closest("form");
+    const searchArea = form || input.closest(".search") || input.parentElement;
+    if (!searchArea) return;
 
-      suggestions.replaceChildren();
+    // Как и раньше, не оставляем в поиске заранее заданный текст.
+    input.removeAttribute("value");
+    input.value = "";
 
-      const uniqueBooks = Array.from(
-        new Map(
-          (Array.isArray(books) ? books : [])
-            .map(book => [String(book.id), book])
-        ).values()
+    // Браузерные подсказки не должны закрывать подсказки FIREBOOKS.
+    input.setAttribute("autocomplete", "off");
+
+    const suggestions = document.createElement("div");
+    suggestions.className = "search-suggest search-suggest--live";
+    suggestions.setAttribute("role", "listbox");
+    suggestions.setAttribute("aria-label", "Найденные книги");
+    suggestions.style.display = "none";
+
+    // Размещаем список вне шапки, чтобы overflow/z-index её не обрезали.
+    document.body.appendChild(suggestions);
+
+    let debounceTimer = null;
+    let searchVersion = 0;
+    let matches = [];
+    let activeIndex = -1;
+
+    function isOpen() {
+      return suggestions.style.display !== "none";
+    }
+
+    function positionSuggestions() {
+      if (!isOpen()) return;
+      const inputRect = input.getBoundingClientRect();
+      const areaRect = searchArea.getBoundingClientRect();
+      const viewportWidth = document.documentElement.clientWidth;
+      const left = Math.max(8, Math.min(areaRect.left, viewportWidth - 208));
+      const width = Math.min(
+        Math.max(inputRect.width, areaRect.width, 200),
+        viewportWidth - left - 8
       );
 
-      if (!uniqueBooks.length) {
+      suggestions.style.left = `${left}px`;
+      suggestions.style.top = `${inputRect.bottom + 5}px`;
+      suggestions.style.width = `${width}px`;
+      suggestions.style.maxHeight = `${Math.max(90, window.innerHeight - inputRect.bottom - 16)}px`;
+    }
+
+    function hideSuggestions() {
+      suggestions.style.display = "none";
+      activeIndex = -1;
+      input.setAttribute("aria-expanded", "false");
+    }
+
+    function openSuggestions() {
+      suggestions.style.display = "block";
+      input.setAttribute("aria-expanded", "true");
+      positionSuggestions();
+    }
+
+    function showMessage(message) {
+      suggestions.replaceChildren();
+      matches = [];
+      activeIndex = -1;
+      const element = document.createElement("div");
+      element.className = "search-suggest__empty";
+      element.textContent = message;
+      suggestions.appendChild(element);
+      openSuggestions();
+    }
+
+    function navigateToBook(book) {
+      if (book?.id == null) return;
+      window.location.href = `/book?id=${encodeURIComponent(book.id)}`;
+    }
+
+    function renderMatches(books) {
+      suggestions.replaceChildren();
+      matches = books;
+      activeIndex = -1;
+
+      if (!books.length) {
         showMessage("Ничего не найдено");
         return;
       }
 
-      uniqueBooks.slice(0, 5).forEach(book => {
-        const item = document.createElement("div");
+      books.forEach((book, index) => {
+        const item = document.createElement("button");
+        item.type = "button";
         item.className = "search-suggest__item";
-        item.dataset.id = String(book.id);
+        item.setAttribute("role", "option");
+        item.setAttribute("aria-selected", "false");
+        item.dataset.index = String(index);
 
         const image = document.createElement("img");
         image.className = "search-suggest__cover";
         image.src = book.cover_url || "";
         image.alt = "";
+        image.loading = "lazy";
 
         const info = document.createElement("div");
         info.className = "search-suggest__info";
 
         const title = document.createElement("p");
         title.className = "search-suggest__title";
-        title.textContent = book.title || book.full_title || "";
+        title.textContent = book.title || book.full_title || "Без названия";
 
         const author = document.createElement("p");
         author.className = "search-suggest__author";
@@ -1291,56 +1434,197 @@ function initSearch() {
         suggestions.appendChild(item);
       });
 
-      suggestions.style.display = "block";
-    } catch (error) {
-      if (error.name !== "AbortError") {
-        console.error("Ошибка поиска:", error);
+      openSuggestions();
+    }
+
+    function setActive(index) {
+      activeIndex = index;
+      suggestions.querySelectorAll(".search-suggest__item").forEach((item, i) => {
+        const selected = i === index;
+        item.classList.toggle("is-active", selected);
+        item.setAttribute("aria-selected", String(selected));
+        if (selected) item.scrollIntoView({ block: "nearest" });
+      });
+    }
+
+    function filterCatalog(books, query) {
+      const q = normalizeSearch(query);
+      const terms = q.split(" ").filter(Boolean);
+
+      return books
+        .filter(book => {
+          const text = normalizeSearch(
+            `${book.title || ""} ${book.full_title || ""} ${book.author || ""}`
+          );
+          return terms.every(term => text.includes(term));
+        })
+        .sort((a, b) => {
+          function rank(book) {
+            const title = normalizeSearch(book.title || book.full_title);
+            const author = normalizeSearch(book.author);
+            if (title === q) return 0;
+            if (title.startsWith(q)) return 1;
+            if (title.split(" ").some(word => word.startsWith(q))) return 2;
+            if (title.includes(q)) return 3;
+            if (author.startsWith(q)) return 4;
+            return 5;
+          }
+          return rank(a) - rank(b);
+        })
+        .filter((book, index, array) =>
+          array.findIndex(item => String(item.id) === String(book.id)) === index
+        )
+        .slice(0, 6);
+    }
+
+    async function runSearch(navigateIfSingle = false) {
+      const query = input.value.trim();
+      const version = ++searchVersion;
+
+      if (!query) {
         hideSuggestions();
+        return;
+      }
+
+      showMessage("Ищем книги...");
+
+      try {
+        let books;
+        try {
+          books = await getCatalog();
+        } catch (catalogError) {
+          // Если полный каталог временно недоступен, используем API поиска.
+          const response = await fetch(
+            `${API}/search?q=${encodeURIComponent(query)}`,
+            { credentials: "same-origin" }
+          );
+          if (!response.ok) throw catalogError;
+          books = await response.json();
+          if (!Array.isArray(books)) throw catalogError;
+        }
+
+        if (version !== searchVersion || input.value.trim() !== query) return;
+        const found = filterCatalog(books, query);
+        if (navigateIfSingle && found.length === 1) {
+          navigateToBook(found[0]);
+          return;
+        }
+        renderMatches(found);
+      } catch (error) {
+        if (version !== searchVersion) return;
+        console.error("Ошибка поиска FIREBOOKS:", error);
+        showMessage("Не удалось выполнить поиск. Попробуйте ещё раз.");
       }
     }
+
+    function scheduleSearch(delay = 100) {
+      clearTimeout(debounceTimer);
+      ++searchVersion; // устаревший ответ больше не попадёт в подсказки
+
+      if (!input.value.trim()) {
+        hideSuggestions();
+        return;
+      }
+
+      debounceTimer = setTimeout(runSearch, delay);
+    }
+
+    input.addEventListener("input", () => scheduleSearch(100));
+    input.addEventListener("focus", () => {
+      if (input.value.trim()) scheduleSearch(0);
+    });
+
+    input.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        hideSuggestions();
+        return;
+      }
+
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        if (!matches.length || !isOpen()) return;
+        event.preventDefault();
+        const direction = event.key === "ArrowDown" ? 1 : -1;
+        setActive((activeIndex + direction + matches.length) % matches.length);
+        return;
+      }
+
+      if (event.key === "Enter" && isOpen() && activeIndex >= 0) {
+        event.preventDefault();
+        navigateToBook(matches[activeIndex]);
+      }
+    });
+
+    // Перехватываем отправку формы, чтобы /search не возвращал на главную.
+    if (form) {
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        clearTimeout(debounceTimer);
+
+        if (!input.value.trim()) {
+          hideSuggestions();
+          input.focus();
+          return;
+        }
+
+        if (isOpen() && activeIndex >= 0 && matches[activeIndex]) {
+          navigateToBook(matches[activeIndex]);
+          return;
+        }
+
+        // При единственном результате Enter открывает книгу.
+        // Если совпадений несколько — показывает выбор в подсказках.
+        if (isOpen() && matches.length === 1) {
+          navigateToBook(matches[0]);
+          return;
+        }
+
+        runSearch(true);
+        input.focus();
+      });
+    }
+
+    if (!form) {
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          if (isOpen() && matches.length === 1) {
+            navigateToBook(matches[0]);
+          } else {
+            runSearch(true);
+          }
+        }
+      });
+    }
+
+    suggestions.addEventListener("click", event => {
+      const item = event.target.closest(".search-suggest__item");
+      if (!item) return;
+      navigateToBook(matches[Number(item.dataset.index)]);
+    });
+
+    document.addEventListener("pointerdown", event => {
+      if (!searchArea.contains(event.target) && !suggestions.contains(event.target)) {
+        hideSuggestions();
+      }
+    });
+
+    window.addEventListener("resize", positionSuggestions);
+    window.addEventListener("scroll", positionSuggestions, true);
   }
 
-  input.addEventListener("input", () => {
-    clearTimeout(timer);
-    requestController?.abort();
+  document.querySelectorAll(selector).forEach(setupSearchInput);
 
-    const query = input.value.trim();
-
-    if (query.length < 2) {
-      hideSuggestions();
-      return;
-    }
-
-    timer = setTimeout(() => searchBooks(query), 300);
+  // Подключаем также поле мобильного поиска, если оно появится позднее.
+  document.addEventListener("focusin", event => {
+    if (event.target.matches?.(selector)) setupSearchInput(event.target);
   });
 
-  suggestions.addEventListener("click", event => {
-    const item = event.target.closest(".search-suggest__item");
-
-    if (item?.dataset.id) {
-      window.location.href =
-        `/book?id=${encodeURIComponent(item.dataset.id)}`;
-    }
-  });
-
-  document.addEventListener("click", event => {
-    if (!form.contains(event.target)) hideSuggestions();
-  });
-
-  input.addEventListener("focus", () => {
-    if (input.value.trim().length >= 2 && suggestions.children.length) {
-      suggestions.style.display = "block";
-    }
-  });
-
-  form.addEventListener("submit", event => {
-    const query = input.value.trim();
-
-    if(!query) {
-      event.preventDefault();
-      input.focus();
-    }
-  });
+  // Начинаем загрузку каталога заранее, чтобы подсказки появлялись быстрее.
+  if (document.querySelector(selector)) {
+    getCatalog().catch(error => {
+      console.warn("Предварительная загрузка поиска не удалась:", error);
+    });
+  }
 }
 
 // ─── Запуск ──────────────────────────────────────────────────
@@ -1352,7 +1636,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSection("/books/bestsellers", "grid-bestsellers");
   loadSection("/books/upcoming", "grid-upcoming");
 
-// Информацию о пользователе теперь загружает auth_frontend.js.
+  // Информацию о пользователе теперь загружает auth_frontend.js.
 
   initBookCardClicks();
   initToggleButtons();
