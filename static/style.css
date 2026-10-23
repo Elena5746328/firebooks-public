@@ -3540,3 +3540,89 @@ img { max-width: 100%; display: block; }
 .footer__socials .social:hover svg {
   transform: scale(1.1);
 }
+
+/* =========================================
+   FIREBOOKS — ИСПРАВЛЕНИЯ БИБЛИОТЕКИ
+   ========================================= */
+
+/* Компактные карточки только в библиотеке */
+
+#library-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    5,
+    minmax(0, 1fr)
+  );
+  gap: 18px;
+}
+
+/* Изображения обложек */
+
+#library-grid .book-card__cover img {
+  object-fit: contain;
+  background: #f8f5f0;
+}
+
+/* Информация под обложкой */
+
+#library-grid .book-card__info {
+  padding: 12px;
+}
+
+/* =========================================
+   ОДИНАКОВЫЕ КРУГЛЫЕ СЧЁТЧИКИ
+   ========================================= */
+
+.cabinet .sidebar__badge {
+  min-width: 30px;
+  margin-left: auto;
+  text-align: center;
+  border-radius: 999px;
+}
+
+/* =========================================
+   АДАПТИВНОСТЬ БИБЛИОТЕКИ
+   ========================================= */
+
+/* Средние экраны */
+
+@media (max-width: 1399px) {
+  #library-grid {
+    grid-template-columns: repeat(
+      4,
+      minmax(0, 1fr)
+    );
+  }
+}
+
+/* Планшеты */
+
+@media (max-width: 1000px) {
+  #library-grid {
+    grid-template-columns: repeat(
+      3,
+      minmax(0, 1fr)
+    );
+  }
+}
+
+/* Телефоны */
+
+@media (max-width: 650px) {
+  #library-grid {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+    gap: 12px;
+  }
+}
+
+/* Очень маленькие экраны */
+
+@media (max-width: 360px) {
+  #library-grid {
+    grid-template-columns: 1fr;
+  }
+}

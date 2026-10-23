@@ -1,0 +1,395 @@
+/* FIREBOOKS — утверждённые баннеры */
+
+.hero .hero__inner {
+  --fb-scene: url("/static/img/FIREBOOKS_bookfree_banner_1.png");
+  --fb-ink: #29201b;
+  --fb-author: #765033;
+  --fb-button: #30251f;
+  --fb-button-text: #fff1db;
+  --fb-mobile-bg: #f8e7cd;
+  --fb-mobile-gradient: linear-gradient(
+    90deg,
+    #f8e7cd 0%,
+    #f8e7cd 56%,
+    rgba(248, 231, 205, .9) 75%,
+    transparent 100%
+  );
+  --fb-dots-left: 52%;
+
+  position: relative;
+  display: block !important;
+  width: 100%;
+  max-width: 1352px;
+  aspect-ratio: 1352 / 620;
+
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  padding: 0 !important;
+  margin: 0 auto;
+  overflow: hidden;
+
+  border-radius: 20px;
+  background-color: var(--fb-mobile-bg);
+  background-image: var(--fb-scene);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  box-shadow: 0 10px 26px rgba(48, 26, 25, .14);
+}
+
+/* ВТОРОЙ БАННЕР */
+
+.hero .hero__inner[data-fb-slide="2"] {
+  --fb-scene: url("/static/img/FIREBOOKS_bookfree_banner_2.png");
+  --fb-ink: #ffe1a9;
+  --fb-author: #f2bf78;
+  --fb-button: #7a132b;
+  --fb-button-text: #ffe5b9;
+  --fb-mobile-bg: #330512;
+  --fb-mobile-gradient: linear-gradient(
+    90deg,
+    #330512 0%,
+    #330512 56%,
+    rgba(51, 5, 18, .9) 75%,
+    transparent 100%
+  );
+  --fb-dots-left: 49%;
+}
+
+/* ТРЕТИЙ БАННЕР */
+
+.hero .hero__inner[data-fb-slide="3"] {
+  --fb-scene: url("/static/img/FIREBOOKS_bookfree_banner_3.png");
+  --fb-ink: #284761;
+  --fb-author: #557998;
+  --fb-button: #315779;
+  --fb-button-text: #ffffff;
+  --fb-mobile-bg: #e3eff8;
+  --fb-mobile-gradient: linear-gradient(
+    90deg,
+    #e3eff8 0%,
+    #e3eff8 56%,
+    rgba(227, 239, 248, .9) 75%,
+    transparent 100%
+  );
+  --fb-dots-left: 53%;
+}
+
+/* ТЕКСТОВАЯ ОБЛАСТЬ */
+
+.hero .hero__text {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+
+  pointer-events: none;
+}
+
+/*
+  На компьютере текст уже нарисован на фоне.
+  Скрываем повторение, сохраняя HTML для доступности.
+*/
+
+.hero .hero__text > :not(#hero-buy):not(.hero__dots) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* КЛИКАБЕЛЬНАЯ ОБЛАСТЬ ПОВЕРХ КНОПКИ */
+
+.hero #hero-buy {
+  position: absolute;
+  left: 5.8%;
+  top: 72.5%;
+
+  width: 22.4%;
+  height: 10%;
+
+  padding: 0;
+  margin: 0;
+
+  opacity: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* При переходе клавиатурой кнопка становится видимой */
+
+.hero #hero-buy:focus-visible {
+  opacity: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+  background: var(--fb-button);
+  color: var(--fb-button-text);
+
+  outline: 3px solid #f3c987;
+  outline-offset: 3px;
+}
+
+/* ТОЧКИ ПЕРЕКЛЮЧЕНИЯ */
+
+.hero .hero__dots {
+  position: absolute;
+  z-index: 4;
+
+  left: var(--fb-dots-left);
+  bottom: 2%;
+
+  display: flex;
+  gap: 8px;
+  margin: 0;
+
+  pointer-events: auto;
+}
+
+.hero .hero__dots .dot {
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, .5);
+  cursor: pointer;
+}
+
+.hero .hero__dots .dot--active {
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .1);
+}
+
+/* НАСТОЯЩАЯ ОБЛОЖКА КНИГИ */
+
+.hero .hero__cover {
+  position: absolute;
+  z-index: 3;
+
+  top: 13%;
+  right: 6.9%;
+
+  width: 24%;
+  height: 73%;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  margin: 0;
+}
+
+.hero .hero__cover img {
+  display: block;
+
+  width: auto !important;
+  height: 100% !important;
+
+  max-width: 100% !important;
+  max-height: 100% !important;
+
+  object-fit: contain;
+  border-radius: 2px;
+
+  box-shadow: 8px 13px 18px rgba(15, 12, 16, .25);
+}
+
+/* МОБИЛЬНАЯ ВЕРСИЯ */
+
+@media (max-width: 768px) {
+
+  .hero .hero__inner {
+    display: grid !important;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(92px, 34%);
+
+    align-items: center;
+    gap: 10px;
+
+    aspect-ratio: auto;
+
+    height: 290px !important;
+    min-height: 290px !important;
+    max-height: 290px !important;
+
+    padding: 18px 14px 34px !important;
+
+    background-image:
+      var(--fb-mobile-gradient),
+      var(--fb-scene);
+
+    background-size: 100% 100%, auto 100%;
+    background-position: center, right center;
+
+    border-radius: 18px;
+  }
+
+  /* Возвращаем настоящий HTML-текст */
+
+  .hero .hero__text {
+    position: relative;
+    inset: auto;
+    z-index: 2;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    padding: 0;
+
+    pointer-events: auto;
+  }
+
+  .hero .hero__text > :not(#hero-buy):not(.hero__dots) {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+
+  .hero .hero__badge,
+  .hero .hero__desc,
+  .hero .hero__teaser p {
+    display: none !important;
+  }
+
+  /* АВТОР */
+
+  .hero .hero__author {
+    order: 0;
+
+    color: var(--fb-author);
+
+    font: 500 10px/1.35 Georgia, serif;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+
+    margin-bottom: 7px !important;
+  }
+
+  /* НАЗВАНИЕ */
+
+  .hero .hero__title {
+    order: 1;
+    display: block;
+
+    color: var(--fb-ink);
+
+    font: 500 clamp(17px, 4.9vw, 24px)/1.1
+      Georgia, serif;
+
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+
+    margin-bottom: 10px !important;
+  }
+
+  /* ОПИСАНИЕ */
+
+  .hero .hero__teaser {
+    order: 2;
+    margin-bottom: 12px !important;
+  }
+
+  .hero .hero__teaser-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+
+    overflow: hidden;
+
+    color: var(--fb-ink) !important;
+    font: 400 11px/1.4 Georgia, serif;
+  }
+
+  /* КНОПКА НА ТЕЛЕФОНЕ */
+
+  .hero #hero-buy {
+    position: static;
+    order: 3;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: auto;
+    height: auto;
+    min-height: 36px;
+
+    padding: 8px 12px;
+    opacity: 1;
+
+    background: var(--fb-button);
+    color: var(--fb-button-text);
+
+    border: 1px solid var(--fb-author);
+    border-radius: 999px;
+
+    font: 500 11px/1.2 Georgia, serif;
+    white-space: nowrap;
+
+    pointer-events: auto;
+  }
+
+  /* ОБЛОЖКА НА ТЕЛЕФОНЕ */
+
+  .hero .hero__cover {
+    position: relative;
+    top: auto;
+    right: auto;
+
+    grid-column: 2;
+    grid-row: 1;
+
+    justify-self: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 180px;
+    min-width: 0;
+  }
+
+  .hero .hero__cover img {
+    width: auto !important;
+    height: auto !important;
+
+    max-width: 100% !important;
+    max-height: 175px !important;
+  }
+
+  /* ТОЧКИ НА ТЕЛЕФОНЕ */
+
+  .hero .hero__dots {
+    left: 14px;
+    bottom: 12px;
+    gap: 9px;
+  }
+}

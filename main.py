@@ -1,20 +1,22 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlencode
+
 from auth_backend import router as auth_router, init_auth_db
 from favorites_backend import router as favorites_router
 from cart_backend import router as cart_router
 from orders_backend import router as orders_router
+from update_book_details import main as update_book_details
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-
 from database import (
     init_db,
     seed_books,
+    get_connection,
     get_all_books as db_get_all_books,
     get_book_by_id,
     get_books_by_ids,
@@ -42,7 +44,7 @@ class Book(BaseModel):
     new_price: int = 0
     discount: int = 0
     full_title: str = ""
-    rating: int = Field(default=0, ge=0, le=5)
+    rating: float = Field(default=0, ge=0, le=5)
     cover_url: str
     status: str = "Уточняйте наличие"
     publisher: str = "Не указано"
@@ -160,7 +162,7 @@ BOOKS = [
     ),
 
     make_book(
-        7,"Мара и Морок", "Лия Арден",
+        7, "Мара и Морок", "Лия Арден",
         "019d2894-9efb-7478-8fcf-e06b5a679917.png",
         849, 1036,
         full_title="Мара и Морок. Особенная Тень",
@@ -240,9 +242,14 @@ BOOKS = [
         )
     ),
 
+    # ========================================================
+    # ЖЕЛЕЗНОЕ ПЛАМЯ
+    # ИСПРАВЛЕНА ОБЛОЖКА
+    # ========================================================
+
     make_book(
         101, "Железное пламя", "Ребекка Яррос",
-        "0194612f-6f3e-76f8-b9d9-53b27e4c50b3.png",
+        "62a38c10c8c4652682ca90b3945f69e6.jpg",
         1312, 1687,
         cover_type="Твердый переплет",
         publisher="Кислород",
@@ -264,6 +271,25 @@ BOOKS = [
             "И даже драконьего огня может оказаться "
             "недостаточно, чтобы спалить всех ее врагов. "
             "Что ж, добро пожаловать в революцию!"
+        )
+    ),
+
+    # ========================================================
+    # ЧЕТВЁРТОЕ КРЫЛО
+    # ИСПРАВЛЕНА ОБЛОЖКА И ЦЕНА
+    # ========================================================
+
+    make_book(
+        102, "Четвёртое крыло", "Ребекка Яррос",
+        "e9c52af3f897a42c929de5c1ddc4aa18.jpg",
+        1679, 2399,
+        rating=0,
+        reviews_count=0,
+        description=("Вайолет Сорренгейл поступает в военную "
+            "академию Басгиат, где будущие всадники "
+            "проходят испытания, чтобы стать партнёрами "
+            "драконов. Ей предстоит найти союзников "
+            "и раскрыть тайны академии."
         )
     ),
 
@@ -289,7 +315,8 @@ BOOKS = [
         699, 899,
         description=(
             "Антиутопия о мире, в котором книги запрещены. "
-            "Пожарный Гай Монтэг начинает сомневаться ""в правилах общества."
+            "Пожарный Гай Монтэг начинает сомневаться "
+            "в правилах общества."
         )
     ),
 
@@ -469,16 +496,75 @@ DEMO_REVIEWS = {
 
 def prepare_book(data):
     """
-    Превращает запись SQLite в модель Book.
-    Добавляет демонстрационные отзывы, если они есть.
+    Получает книгу из SQLite и добавляет отзывы
+    из базы данных FIREBOOKS.
     """
     if data is None:
         return None
 
     book = Book.model_validate(data)
 
-    if book.id in DEMO_REVIEWS:
-        book.reviews = DEMO_REVIEWS[book.id]
+    # Пока подключаем новые отзывы только для двух книг.
+    # Остальной каталог не изменяем.
+    if book.id not in (101, 102):
+        return book
+
+    connection = get_connection()
+
+    try:
+        rows = connection.execute(
+            """
+            SELECT
+                author,
+                rating,
+                text,
+                source,
+                is_demo
+            FROM v_book_reviews
+            WHERE book_id = ?
+            ORDER BY created_at DESC, review_key DESC
+            """,
+            (book.id,)
+        ).fetchall()
+    finally:
+        connection.close()
+
+    book.reviews = []
+
+    for row in rows:
+        author = row["author"]
+        source = row["source"] or ""
+
+        # Показываем происхождение отзыва.
+        if source.startswith("Читай-город"):
+            author += (
+                " · Читай-город "
+                "(пересказ, оценка условная)"
+            )
+        elif row["is_demo"]:
+            author += " · демо FIREBOOKS"
+
+        book.reviews.append(
+            Review(
+                author=author,
+                rating=row["rating"],
+                text=row["text"]
+            )
+        )
+
+    # Количество отзывов берём из базы.
+    book.reviews_count = len(book.reviews)
+
+    # Рассчитываем демонстрационный рейтинг.
+    if book.reviews:
+        total_rating = sum(
+            review.rating for review in book.reviews
+        )
+        book.rating = round(
+            total_rating / len(book.reviews), 1
+        )
+    else:
+        book.rating = 0
 
     return book
 
@@ -497,6 +583,51 @@ async def lifespan(app: FastAPI):
     init_db()
     init_auth_db()
     seed_books(BOOKS)
+    update_book_details()
+
+    # Обновляем уже существующие записи в SQLite.
+    # Остальные книги и данные не изменяем.
+
+    connection = get_connection()
+
+    try:
+        # Железное пламя: правильная обложка
+        connection.execute(
+            """
+            UPDATE books
+            SET cover_url = ?
+            WHERE id = ?
+            """,
+            (
+                "/static/img/62a38c10c8c4652682ca90b3945f69e6.jpg",
+                101,
+            )
+        )
+
+        # Четвёртое крыло: обложка и цены
+        connection.execute(
+            """
+            UPDATE books
+            SET cover_url = ?,
+                old_price = ?,
+                new_price = ?,
+                discount = ?
+            WHERE id = ?
+            """,
+            (
+                "/static/img/e9c52af3f897a42c929de5c1ddc4aa18.jpg",
+                2399,
+                1679,
+                30,
+                102,
+            )
+        )
+
+        connection.commit()
+
+    finally:
+        connection.close()
+
     yield
 
 app = FastAPI(
@@ -528,7 +659,7 @@ HERO_BOOK = HeroBook(
     ),
     cover_url=(
         "/static/img/"
-        "0194612e-c1aa-77ef-b35f-892218e71e36.png"
+        "e9c52af3f897a42c929de5c1ddc4aa18.jpg"
     )
 )
 
