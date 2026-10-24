@@ -71,8 +71,6 @@
       svg.setAttribute(key, value);
     }
 
-    svg.classList.add("sidebar__mobile-icon");
-
     for (const d of paths[name]) {
       const path = document.createElementNS(
         SVG_NS,
@@ -106,8 +104,7 @@
       link = document.createElement("a");
       link.href = section.href;
 
-      link.className =
-        "sidebar__item sidebar__item--mobile-only";
+      link.className = "sidebar__item";
 
       const label = document.createElement("span");
       label.className = "sidebar__label";
@@ -303,11 +300,45 @@
   }
 
   function refreshCounts() {
-    setCount("library", "…");
-    setCount("bookmarks", "…");
-    setCount("reviews", "…");
+      setCount("library", "…");
+      setCount("bookmarks", "…");
+      setCount("reviews", "…");
 
-    updateServerCounts();
-  }
+      updateServerCounts();
+    }
 
-})();
+    // Загружаем счётчики при открытии страницы
+    refreshCounts();
+
+    // Обновляем после входа или выхода из аккаунта
+    document.addEventListener(
+      "firebooks:auth-changed",
+      refreshCounts
+    );
+
+    // Обновляем после изменений в личном кабинете
+    document.addEventListener(
+      "firebooks:counts-changed",
+      refreshCounts
+    );
+
+    // Обновляем при изменениях в другой вкладке
+    window.addEventListener(
+      "storage",
+      refreshCounts
+    );
+
+    // Обновляем при возвращении на страницу
+    window.addEventListener("pageshow", event => {
+      if (event.persisted) {
+        refreshCounts();
+      }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        refreshCounts();
+      }
+    });
+
+  })();

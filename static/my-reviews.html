@@ -644,14 +644,19 @@
   }
 
   function updateCounters() {
-    document.getElementById("library-count").textContent =
-      getPurchasedCount();
+    // На этой странице обновляем только число отзывов.
+    // Библиотеку и закладки считает общий скрипт
+    // firebooks_cabinet_menu.js по данным сервера.
 
-    document.getElementById("bookmarks-count").textContent =
-      getFavoritesCount();
+    const reviewsBadge = document.getElementById(
+      "reviews-count"
+    );
 
-    document.getElementById("reviews-count").textContent =
-      getReviews().length;
+    if (reviewsBadge) {
+      reviewsBadge.textContent = String(
+        serverReviews.length
+      );
+    }
   }
 
   function formatDate(value) {
