@@ -231,15 +231,34 @@
     ).size;
   }
 
+    function countReviews(data) {
+    if (Array.isArray(data?.reviews)) {
+      return data.reviews.length;
+    }
+
+    if (Array.isArray(data)) {
+      return data.length;
+    }
+
+    throw new Error("Неизвестный формат списка отзывов");
+  }
+
   let requestVersion = 0;
 
   async function updateServerCounts() {
     const version = ++requestVersion;
 
-    const endpoints = [
-      ["library", "/api/orders", countOrders],
-      ["bookmarks", "/api/favorites", countFavorites]
-    ];
+  const endpoints = [
+    ["library", "/api/orders", countOrders],
+    ["bookmarks", "/api/favorites", countFavorites],
+    [
+      "reviews",
+      "/api/reviews/mine",
+      data => Array.isArray(data?.reviews)
+        ? data.reviews.length
+        : 0
+    ]
+  ];
 
     await Promise.all(
       endpoints.map(async ([type, url, count]) => {
@@ -284,43 +303,11 @@
   }
 
   function refreshCounts() {
-    setCount(
-      "reviews",
-      readArray("firebooks_reviews").length
-    );
-
     setCount("library", "…");
     setCount("bookmarks", "…");
+    setCount("reviews", "…");
 
     updateServerCounts();
   }
-
-  refreshCounts();
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    refreshCounts
-  );
-
-  document.addEventListener(
-    "firebooks:auth-changed",
-    refreshCounts
-  );
-
-  document.addEventListener(
-    "firebooks:counts-changed",
-    refreshCounts
-  );
-
-  window.addEventListener(
-    "storage",
-    refreshCounts
-  );
-
-  window.addEventListener("pageshow", event => {
-    if (event.persisted) {
-      refreshCounts();
-    }
-  });
 
 })();

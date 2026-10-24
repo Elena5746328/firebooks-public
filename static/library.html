@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Библиотека — FIREBOOKS</title>
   <link rel="stylesheet" href="/static/style.css">
-  <link rel="stylesheet" href="/static/cabinet.css">
-  <link rel="stylesheet" href="/static/firebooks_cabinet_mobile.css">
+  <link rel="stylesheet" href="/static/firebooks_cabinet_module.css">
 
   <style>
     [hidden] {
@@ -135,6 +134,166 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+/* ==========================================
+   FIREBOOKS — МОБИЛЬНАЯ БИБЛИОТЕКА
+   ДВЕ КНИГИ В РЯД
+   Только для library.html
+   ========================================== */
+
+@media (max-width: 768px) {
+
+  /* Сетка из двух карточек */
+  #library-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+    align-items: start;
+  }
+
+  /* Внешняя карточка */
+  #library-grid .cabinet__card {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Книга */
+  #library-grid .book-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Контейнер обложки */
+  #library-grid .book-card__cover {
+    position: relative;
+    width: 125px;
+    max-width: 100%;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: auto;
+    margin: 0 auto 12px;
+  }
+
+  #library-grid .book-card__cover a {
+    display: block;
+    width: 100%;
+  }
+
+  /* Обложка */
+  #library-grid .book-card__cover img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 185px;
+    object-fit: contain;
+  }
+
+  /* Сердечко — сверху справа */
+  #library-grid .book-card__fav {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    bottom: auto;
+    left: auto;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    border-radius: 50%;
+    z-index: 2;
+  }
+
+  /* Информация о книге */
+  #library-grid .book-card__info {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+  }
+
+  #library-grid .book-card__type {
+    font-size: 11px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  #library-grid .book-card__new-price {
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  #library-grid .book-card__title {
+    display: block;
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  #library-grid .book-card__author {
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  /* Кнопка покупки */
+  #library-grid .book-card__btn {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 6px;
+    font-size: 13px;
+    line-height: 1.3;
+    white-space: normal;
+  }
+
+  /* Блок написания отзыва */
+  #library-grid .review-prompt,
+  #library-grid .library__review-info {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 12px 9px;
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  #library-grid .review-prompt__text,
+  #library-grid .library__review-info p {
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  /* Кнопки отзывов */
+  #library-grid .review-prompt__btn,
+  #library-grid .library__review-btn {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px 6px;
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: normal;
+  }
+
+}
+
+/* На совсем узких экранах — одна колонка */
+@media (max-width: 359px) {
+  #library-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
   </style>
 </head>
 <body>
@@ -488,6 +647,8 @@
   let selectedRating = 0;
   let purchasedBooks = [];
   let libraryLoadVersion = 0;
+  let myReviews = [];
+  let reviewsReady = false;
 
   function readArray(key) {
     try {
@@ -703,11 +864,55 @@
   function getBookReview(book) {
     if (book.id === null) return null;
 
-    return readArray(REVIEWS_KEY).find(review =>
+    return myReviews.find(review =>
       review &&
-      typeof review === "object" &&
-      reviewBookId(review) === String(book.id)
+      String(review.bookId) === String(book.id)
     ) || null;
+  }
+
+  async function loadMyReviews() {
+    reviewsReady = false;
+
+    try {
+      const response = await fetch("/api/reviews/mine", {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+
+      if (response.status === 401) {
+        myReviews = [];
+        return false;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          "Ошибка загрузки отзывов: " + response.status
+        );
+      }
+
+      const data = await response.json();
+
+      myReviews = Array.isArray(data.reviews)
+        ? data.reviews
+        : [];
+
+      reviewsReady = true;
+      return true;
+
+    } catch (error) {
+      console.error(
+        "FIREBOOKS: ошибка загрузки отзывов",
+        error
+      );
+
+      myReviews = [];
+      return false;
+    }
+  }
+
+  async function refreshLibrary() {
+    await loadMyReviews();
+    await loadPurchasedBooks();
   }
 
   async function updateProfile() {
@@ -756,7 +961,7 @@
       favoriteIds().size;
 
     document.getElementById("reviews-count").textContent =
-      readArray(REVIEWS_KEY).length;
+      myReviews.length;
   }
 
   function buyAgain(book) {
@@ -890,6 +1095,19 @@
     wrapper.appendChild(card);
 
     // ОТЗЫВ
+
+    if (!reviewsReady) {
+      wrapper.appendChild(
+        make(
+          "p",
+          "library__review-info",
+          "Не удалось загрузить отзывы. Обновите страницу."
+        )
+      );
+
+      return wrapper;
+    }
+
     const review = getBookReview(book);
 
     if (review) {
@@ -1078,10 +1296,10 @@
     }
   });
 
-  reviewForm.addEventListener("submit", event => {
+  reviewForm.addEventListener("submit", async event => {
     event.preventDefault();
 
-    if (!currentBook) return;
+    if (!currentBook || !reviewsReady) return;
 
     if (selectedRating < 1 || selectedRating > 5) {
       alert("Пожалуйста, выберите оценку от 1 до 5.");
@@ -1097,57 +1315,87 @@
       return;
     }
 
-    const reviews = readArray(REVIEWS_KEY);
+    const existing = getBookReview(currentBook);
 
-    const existingIndex = reviews.findIndex(review =>
-      review &&
-      typeof review === "object" &&
-      reviewBookId(review) === String(currentBook.id)
+    const url = existing
+      ? "/api/reviews/" + encodeURIComponent(existing.id)
+      : "/api/reviews";
+
+    const method = existing ? "PUT" : "POST";
+
+    const payload = existing
+      ? {
+          rating: selectedRating,
+          text: text
+        }
+      : {
+          book_id: Number(currentBook.id),
+          rating: selectedRating,
+          text: text
+        };
+
+    const submitButton = reviewForm.querySelector(
+      ".library__submit"
     );
 
-    const newReview = {
-      bookId: currentBook.id,
-      bookTitle: currentBook.title,
-      author: currentBook.author,
-      cover: currentBook.cover,
-      rating: selectedRating,
-      text: text,
-      createdAt: new Date().toISOString()
-    };
-
-    if (existingIndex !== -1) {
-      const oldReview = reviews[existingIndex];
-
-      newReview.createdAt =
-        oldReview.createdAt || newReview.createdAt;
-
-      newReview.updatedAt = new Date().toISOString();
-
-      reviews[existingIndex] = newReview;
-    } else {
-      reviews.unshift(newReview);
-    }
+    submitButton.disabled = true;
 
     try {
-      saveArray(REVIEWS_KEY, reviews);
-    } catch (error) {
-      console.error(error);
-      alert("Не удалось сохранить отзыв.");
-      return;
-    }
+      const response = await fetch(url, {
+        method: method,
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
 
-    closeReviewModal();
-    updateCounters();
-    renderLibrary();
+      const result = await response.json().catch(
+        () => ({})
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          typeof result.detail === "string"
+            ? result.detail
+            : "Ошибка сохранения: " + response.status
+        );
+      }
+
+      closeReviewModal();
+
+      const loaded = await loadMyReviews();
+
+      if (!loaded) {
+        alert(
+          "Отзыв сохранён, но список не удалось обновить. " +
+          "Обновите страницу."
+        );
+      }
+
+      updateCounters();
+      renderLibrary();
+
+    } catch (error) {
+      console.error(
+        "FIREBOOKS: ошибка сохранения отзыва",
+        error
+      );
+
+      alert(
+        "Не удалось сохранить отзыв: " + error.message
+      );
+
+    } finally {
+      submitButton.disabled = false;
+    }
   });
 
 // Обновляем закладки и отзывы,
   // если данные изменились в другой вкладке.
   window.addEventListener("storage", event => {
     if (
-      event.key === FAVORITES_KEY ||
-      event.key === REVIEWS_KEY
-    ) {
+      event.key === FAVORITES_KEY ) {
       updateCounters();
       renderLibrary();
     }
@@ -1159,7 +1407,7 @@
     "firebooks:auth-changed",
     () => {
       updateProfile();
-      loadPurchasedBooks();
+      refreshLibrary();
     }
   );
 
@@ -1169,7 +1417,7 @@
     "visibilitychange",
     () => {
       if (!document.hidden) {
-        loadPurchasedBooks();
+        refreshLibrary();
       }
     }
   );
@@ -1177,7 +1425,7 @@
   // Первоначальная загрузка профиля
   // и книг из базы данных.
   updateProfile();
-  loadPurchasedBooks();
+  refreshLibrary();
 
 })();
 </script>

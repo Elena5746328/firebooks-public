@@ -1968,17 +1968,46 @@ img { max-width: 100%; display: block; }
   overflow: hidden;
 }
 
-/* Адаптив */
+/* ==========================================
+   FIREBOOKS — СТРАНИЦА КНИГИ
+   МОБИЛЬНАЯ ВЕРСИЯ
+   ========================================== */
+
 @media (max-width: 768px) {
+
+  .book-page {
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Обложка сверху, информация снизу */
   .book-page__wrapper {
     flex-direction: column;
+    align-items: stretch;
     gap: 32px;
+    width: 100%;
+  }
+
+  /* Центрируем обложку вместе с сердечком */
+  .book-page__cover-side {
+    width: 220px;
+    max-width: 100%;
+    align-self: center;
   }
 
   .book-page__cover {
-    width: 220px;
+    display: block;
+    width: 100%;
     height: 320px;
     margin: 0 auto;
+  }
+
+  /* Информация занимает всю доступную ширину */
+  .book-page__info {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .book-page__title {
@@ -1989,12 +2018,17 @@ img { max-width: 100%; display: block; }
     font-size: 26px;
   }
 
+  /* Цена не выходит за границы экрана */
   .book-page__prices {
+    flex-wrap: wrap;
     padding: 16px 18px;
+    box-sizing: border-box;
   }
 
+  /* Кнопки друг под другом */
   .book-page__actions {
     flex-direction: column;
+    width: 100%;
   }
 
   .book-page__desc-text {
@@ -2004,6 +2038,7 @@ img { max-width: 100%; display: block; }
   .book-page__heading {
     font-size: 20px;
   }
+
 }
 
 /* ─── Автоподсказки поиска ──────────────────────────────────── */
@@ -2145,7 +2180,7 @@ img { max-width: 100%; display: block; }
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--burgundy) 0%, var(--burgundy-dark) 100%);
+  background: #8b2a24;
   color: var(--white);
   display: flex;
   align-items: center;
@@ -3626,3 +3661,736 @@ img { max-width: 100%; display: block; }
     grid-template-columns: 1fr;
   }
 }
+
+/* Кнопка «Купить» — без градиента */
+#bp-buy {
+  background: #8b2a24;
+  background-image: none;
+}
+
+#bp-buy:hover {
+  background: #8b2a24;
+  background-image: none;
+}
+
+/* ==========================================
+   FIREBOOKS — ТРИ КНИЖНЫЕ АТМОСФЕРЫ
+   ========================================== */
+
+/* Общая основа */
+
+.hero .hero__inner {
+  position: relative;
+  isolation: isolate;
+  border-radius: 20px;
+  transition: background-color 0.3s ease;
+}
+
+/* Полностью убираем старые узоры */
+
+.hero .hero__inner::before {
+  content: none !important;
+}
+
+/* Содержимое баннера */
+
+.hero .hero__inner > .hero__text,
+.hero .hero__inner > .hero__cover {
+  z-index: 1;
+}
+
+/* Надпись над названием */
+
+.hero .hero__badge {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* Обложка и декорация за ней */
+
+.hero .hero__cover {
+  position: relative;
+  z-index: 1;
+}
+
+.hero .hero__cover::before {
+  content: "";
+  position: absolute;
+  inset: 7% 2%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero .hero__cover img {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==========================================
+   01 — ЧЕТВЁРТОЕ КРЫЛО
+   ========================================== */
+
+.hero .hero__inner[data-pattern="dragons"] {
+  background:
+    radial-gradient(
+      circle at 77% 48%,
+      rgba(214, 185, 137, 0.22),
+      transparent 34%
+    ),
+    linear-gradient(
+      115deg,
+      #293a46 0%,
+      #334754 55%,
+      #4b606b 100%
+    );
+}
+
+.hero .hero__inner[data-pattern="dragons"] .hero__badge,
+.hero .hero__inner[data-pattern="dragons"] .hero__teaser-title {
+  color: #d6b989;
+}
+
+.hero .hero__inner[data-pattern="dragons"] .hero__cover::before {
+  border: 1px solid rgba(214, 185, 137, 0.45);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(214, 185, 137, 0.12),
+    transparent 70%
+  );
+  box-shadow: 0 0 60px rgba(214, 185, 137, 0.12);
+}
+
+.hero .hero__inner[data-pattern="dragons"] .btn--hero {
+  background: #b18a58;
+  background-image: none;
+  color: #fff;
+}
+
+/* ==========================================
+   02 — АКАДЕМИЯ ВАМПИРОВ
+   ========================================== */
+
+.hero .hero__inner[data-pattern="feathers"] {
+  background:
+    radial-gradient(
+      circle at 78% 48%,
+      rgba(207, 137, 160, 0.2),
+      transparent 36%
+    ),
+    linear-gradient(
+      115deg,
+      #3a1729 0%,
+      #481b30 52%,
+      #733e57 100%
+    );
+}
+
+.hero .hero__inner[data-pattern="feathers"] .hero__badge,
+.hero .hero__inner[data-pattern="feathers"] .hero__teaser-title {
+  color: #f1c4cd;
+}
+
+.hero .hero__inner[data-pattern="feathers"] .hero__cover::before {
+  inset: 5% 3%;
+
+  border: 1px solid rgba(241, 196, 205, 0.45);
+
+  border-radius:
+    180px 180px 12px 12px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(241, 196, 205, 0.13),
+    rgba(50, 10, 30, 0.08)
+  );
+
+  box-shadow: 0 0 55px rgba(180, 95, 125, 0.13);
+}
+
+.hero .hero__inner[data-pattern="feathers"] .btn--hero {
+  background: #a95f77;
+  background-image: none;
+  color: #fff;
+}
+
+/* ГОРДОСТЬ И ПРЕДУБЕЖДЕНИЕ — ЗОЛОТИСТО-БЕЖЕВЫЙ */
+
+.hero .hero__inner[data-pattern="scales"] {
+  background:
+    radial-gradient(
+      circle at 78% 45%,
+      rgba(255, 241, 212, 0.20),
+      transparent 48%
+    ),
+    linear-gradient(
+      115deg,
+      #e0cba7 0%,
+      #d5ba8e 52%,
+      #c6a46e 100%
+    );
+}
+
+.hero .hero__inner[data-pattern="scales"] .hero__badge {
+  color: #627c6b;
+}
+
+.hero .hero__inner[data-pattern="scales"] .hero__title {
+  color: #374d41;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.hero .hero__inner[data-pattern="scales"] .hero__author,
+.hero .hero__inner[data-pattern="scales"] .hero__desc {
+  color: #647568;
+}
+
+.hero .hero__inner[data-pattern="scales"] .hero__teaser,
+.hero .hero__inner[data-pattern="scales"] .hero__teaser-title,
+.hero .hero__inner[data-pattern="scales"] .hero__teaser p {
+  color: #45584b;
+}
+
+.hero .hero__inner[data-pattern="scales"] .hero__cover::before {
+  inset: 5% 2%;
+
+  border: 4px double rgba(130, 141, 112, 0.55);
+  border-radius: 3px;
+
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.hero.hero__inner[data-pattern="scales"] .btn--hero {
+  background: #627c6b;
+  background-image: none;
+  color: #fff;
+}
+
+/* ==========================================
+   ОБЩИЕ СТРЕЛКИ
+   ========================================== */
+
+.hero .hero__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+  padding: 0;
+
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.95);
+  color: #374d41;
+
+  font-size: 30px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.2s ease;
+}
+
+.hero .hero__arrow:hover {
+  background: #f2e9dc;
+}
+
+.hero .hero__arrow:focus-visible {
+  outline: 2px solid #b18a58;
+  outline-offset: 3px;
+}
+
+/* Компьютер */
+
+@media (min-width: 769px) {
+  .hero .hero__inner {
+    overflow: visible;
+  }
+
+  .hero .hero__arrow--prev {
+    left: -21px;
+  }
+
+  .hero .hero__arrow--next {
+    right: -21px;
+  }
+}
+
+/* Телефон — существующий макет сохраняется */
+
+@media (max-width: 768px) {
+  .hero .hero__inner {
+    overflow: hidden;
+  }
+
+  .hero .hero__cover::before {
+    inset: 5% 0;
+    border-width: 1px;
+  }
+
+  .hero .hero__arrow {
+    top: auto;
+    bottom: 9px;
+    transform: none;
+
+    width: 30px;
+    height: 30px;
+
+    font-size: 24px;
+  }
+
+  .hero .hero__arrow--prev {
+    left: 12px;
+  }
+
+  .hero .hero__arrow--next {
+    right: 12px;
+  }
+
+  .hero .hero__badge {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* FIREBOOKS — стрелки внутри баннера */
+
+@media (min-width: 769px) {
+  .hero .hero__inner {
+    overflow: hidden;
+  }
+
+  .hero .hero__arrow--prev {
+    left: 12px;
+  }
+
+  .hero .hero__arrow--next {
+    right: 12px;
+  }
+}
+
+/* ==========================================
+   FIREBOOKS — ПАТТЕРНЫ ТРЁХ КНИЖНЫХ МИРОВ
+   ========================================== */
+
+/* 1. Драконы */
+.hero .hero__inner[data-pattern="dragons"] {
+  --fb-pattern: url("/static/img/hero-dragons.png");
+  --fb-pattern-opacity: 0.18;
+}
+
+/* 2. Перья */
+.hero .hero__inner[data-pattern="feathers"] {
+  --fb-pattern: url("/static/img/hero-feathers.png");
+  --fb-pattern-opacity: 0.17;
+}
+
+/* 3. Чешуя */
+.hero .hero__inner[data-pattern="scales"] {
+  --fb-pattern: url("/static/img/hero-scales.png");
+  --fb-pattern-opacity: 0.06;
+}
+
+/* Полупрозрачный декоративный слой */
+
+.hero .hero__inner::before {
+  content: "" !important;
+
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  border-radius: inherit;
+  pointer-events: none;
+
+  background-image: var(--fb-pattern, none);
+  background-repeat: repeat;
+  background-size: 160px auto;
+  background-position: right center;
+
+  opacity: var(--fb-pattern-opacity, 0.16);
+
+  /* Плавное появление узора справа */
+
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 35%,
+    rgba(0, 0, 0, 0.25) 55%,
+    #000 85%
+  );
+
+  mask-image: linear-gradient(
+    to right,
+    transparent 35%,
+    rgba(0, 0, 0, 0.25) 55%,
+    #000 85%
+  );
+}
+
+/* На телефоне узор ещё нежнее */
+
+@media (max-width: 768px) {
+  .hero .hero__inner::before {
+    background-size: 105px auto;
+    opacity: 0.12;
+
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 45%,
+      #000 100%
+    );
+
+    mask-image: linear-gradient(
+      to right,
+      transparent 45%,
+      #000 100%
+    );
+  }
+}
+
+/* ==========================================
+   FIREBOOKS — ЧЁТКИЙ ПАТТЕРН ДЛЯ ДЖЕЙН ОСТИН
+   ========================================== */
+
+.hero .hero__inner[data-pattern="scales"]::before {
+  opacity: 0.42;
+  background-size: 145px auto;
+  background-position: right center;
+
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 35%,
+    rgba(0, 0, 0, 0.5) 60%,
+    #000 85%
+  );
+
+  mask-image: linear-gradient(
+    to right,
+    transparent 35%,
+    rgba(0, 0, 0, 0.5) 60%,
+    #000 85%
+  );
+}
+
+/* На телефоне — чуть нежнее */
+
+@media (max-width: 768px) {
+  .hero .hero__inner[data-pattern="scales"]::before {
+    opacity: 0.30;
+    background-size: 100px auto;
+  }
+}
+
+/* FIREBOOKS — выразительная чешуя для третьего баннера */
+
+.hero .hero__inner[data-pattern="scales"]::before {
+  opacity: 0.65;
+  background-size: 230px auto;
+  background-position: right center;
+  mix-blend-mode: multiply;
+
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 35%,
+    rgba(0, 0, 0, 0.45) 55%,
+    #000 85%
+  );
+
+  mask-image: linear-gradient(
+    to right,
+    transparent 35%,
+    rgba(0, 0, 0, 0.45) 55%,
+    #000 85%
+  );
+}
+
+/* На телефоне сохраняем более нежный узор */
+
+@media (max-width: 768px) {
+  .hero .hero__inner[data-pattern="scales"]::before {
+    opacity: 0.38;
+    background-size: 135px auto;
+  }
+}
+
+/* FIREBOOKS — небольшой отступ текста от левой стрелки */
+
+@media (min-width: 769px) {
+  .hero .hero__inner > .hero__text {
+    transform: translateX(22px);
+  }
+}
+
+/* ==========================================
+   FIREBOOKS — ГОРДОСТЬ И ПРЕДУБЕЖДЕНИЕ
+
+   Тёмный бежевый → светлый бежевый
+   Крупная чешуя без зелёного оттенка
+   Тонкая прямоугольная рамка
+   Белый текст
+
+   Только компьютерная версия
+   ========================================== */
+
+@media (min-width: 769px) {
+
+  /* 1. ПЛАВНЫЙ ТЁПЛЫЙ БЕЖЕВЫЙ ГРАДИЕНТ */
+
+  .hero .hero__inner[data-pattern="scales"] {
+    background: linear-gradient(
+      90deg,
+      #70523e 0%,
+      #80604a 28%,
+      #947258 48%,
+      #ae8c6b 65%,
+      #ceb08e 82%,
+      #eddbc0 100%
+    );
+  }
+
+  /* 2. КРУПНАЯ ЧЕШУЯ БЕЗ ЗЕЛЕНОВАТОГО ОТТЕНКА */
+
+  .hero .hero__inner[data-pattern="scales"]::before {
+    content: "" !important;
+
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    border-radius: inherit;
+    pointer-events: none;
+
+    background-image: url("/static/img/hero-scales.png");
+    background-repeat: repeat;
+    background-size: 235px auto;
+    background-position: right center;
+
+    /* Убираем холодный цвет из рисунка */
+    filter: grayscale(1) sepia(1) saturate(0.7);
+
+    opacity: 0.45;
+    mix-blend-mode: normal;
+
+    /* Чешуя плавно проявляется слева направо */
+
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 22%,
+      rgba(0, 0, 0, 0.35) 43%,
+      rgba(0, 0, 0, 0.75) 65%,
+      #000 85%
+    );
+
+    mask-image: linear-gradient(
+      to right,
+      transparent 22%,
+      rgba(0, 0, 0, 0.35) 43%,
+      rgba(0, 0, 0, 0.75) 65%,
+      #000 85%
+    );
+  }
+
+  /* 3. ТОНКАЯ ПРЯМОУГОЛЬНАЯ РАМКА */
+
+  .hero .hero__inner[data-pattern="scales"]
+  .hero__cover::before {
+    content: "";
+
+    position: absolute;
+    inset: 5% 3%;
+    z-index: 0;
+
+    pointer-events: none;
+
+    border: 1px solid rgba(255, 248, 235, 0.30);
+    border-radius: 10px;
+
+    background: rgba(255, 248, 235, 0.025);
+
+    box-shadow: none;
+  }
+
+  /* Обложка поверх рамки */
+
+  .hero .hero__inner[data-pattern="scales"]
+  .hero__cover img {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 4. БЕЛЫЕ НАДПИСИ */
+
+  .hero .hero__inner[data-pattern="scales"] .hero__badge,
+  .hero .hero__inner[data-pattern="scales"] .hero__desc,
+  .hero .hero__inner[data-pattern="scales"] .hero__title,
+  .hero .hero__inner[data-pattern="scales"] .hero__author,
+  .hero .hero__inner[data-pattern="scales"] .hero__teaser,
+  .hero .hero__inner[data-pattern="scales"] .hero__teaser-title,
+  .hero .hero__inner[data-pattern="scales"] .hero__teaser p {
+    color: #ffffff !important;
+  }
+
+}
+
+/* ==========================================
+   FIREBOOKS — ОФОРМЛЕНИЕ ЗАКАЗА
+   Исправление только мобильной версии
+   ========================================== */
+
+@media (max-width: 768px) {
+
+  /* Основной контейнер */
+  .checkout {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .checkout > .container {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Вместо двух колонок — одна */
+  .checkout__wrapper {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    gap: 28px;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+  /* Форма и итог заказа */
+  .checkout__form-side,
+  .checkout__summary {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+  }
+
+  /* Отключаем закрепление итогового блока */
+  .checkout__summary {
+    position: static !important;
+  }
+
+  /* Секции формы */
+  .checkout__section,
+  .checkout__field {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /* Имя и телефон друг под другом */
+  .checkout__row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100%;
+    gap: 16px;
+  }
+
+  /* Поля ввода */
+  .checkout__input {
+    display: block;
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /* Варианты доставки и оплаты */
+  .checkout__options {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .checkout__option {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .checkout__option-content {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* Книги в итоговом заказе */
+  .checkout__items,
+  .checkout__item-info {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .checkout__item-title {
+    overflow-wrap: anywhere;
+  }
+
+  /* Кнопка оформления */
+  .checkout__btn {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* ==========================================
+   FIREBOOKS — ИСПРАВЛЕНИЕ ВНЕШНЕЙ СЕТКИ
+   ОФОРМЛЕНИЯ ЗАКАЗА НА ТЕЛЕФОНЕ
+   ========================================== */
+
+@media (max-width: 768px) {
+
+  /* Заголовок и форма больше не стоят рядом */
+  .checkout > .container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+
+  /* Заголовок занимает отдельную строку */
+  .checkout > .container > .cabinet__title {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+  }
+
+  /* Форма и итог заказа идут друг под другом */
+  .checkout > .container > .checkout__wrapper {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+}
+

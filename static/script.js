@@ -6,7 +6,7 @@ const USER_KEY = "firebooks_user_name";
 
 function formatPrice(value) {
   const number = Number(String(value ?? 0).replace(/[^\d.,]/g, "").replace(",", "."));
-  return (Number.isFinite(number) ? number : 0).toLocaleString("ru-RU") + " р.";
+  return (Number.isFinite(number) ? number : 0).toLocaleString("ru-RU") + " ₽";
 }
 
 function priceNumber(value) {
@@ -192,7 +192,8 @@ async function loadHero() {
   const teaserFirst = document.getElementById("hero-teaser-first");
   const teaserSecond = document.getElementById("hero-teaser-second");
   const buyButton = document.getElementById("hero-buy");
-  const dots = [...document.querySelectorAll(".hero__dots .dot")];
+  const prevArrow = document.getElementById("hero-prev");
+  const nextArrow = document.getElementById("hero-next");
 
   const slides = [
     {
@@ -238,6 +239,11 @@ async function loadHero() {
     }
   ];
 
+    // Меняем местами второй и третий баннеры
+  [slides[1], slides[2]] = [slides[2], slides[1]];
+
+  let activeSlide = 0;
+
   function normalizeTitle(value) {
     return String(value || "")
       .toLocaleLowerCase("ru")
@@ -251,6 +257,29 @@ async function loadHero() {
     if (!slide.cover_url) {
       console.warn("Для баннера не найдена обложка:", slide.title);
       return;
+    }
+
+    activeSlide = index;
+
+    const heroInner = title.closest(".hero__inner");
+
+    if (heroInner) {
+      const themes = ["dragons", "scales", "feathers"];
+
+      heroInner.dataset.pattern = themes[index];
+
+      // Индивидуальная надпись для каждой книги
+      const badge = heroInner.querySelector(".hero__badge");
+
+      if (badge) {
+        const labels = [
+          "01 / ДРАКОНЬЯ АКАДЕМИЯ",
+          "02 / АНГЛИЙСКАЯ КЛАССИКА",
+          "03 / ТАЙНЫ АКАДЕМИИ"
+        ];
+
+        badge.textContent = labels[index];
+      }
     }
 
     if (description) {
@@ -285,12 +314,6 @@ async function loadHero() {
         ? `/book?id=${encodeURIComponent(slide.bookId)}`
         : `/catalog?q=${encodeURIComponent(slide.searchTitle)}`;
     }
-
-    dots.forEach((dot, dotIndex) => {
-      const active = dotIndex === index;
-      dot.classList.toggle("dot--active", active);
-      dot.setAttribute("aria-pressed", String(active));
-    });
   }
 
   try {
@@ -351,7 +374,7 @@ async function loadHero() {
       heroInner.style.height = "auto";
 
       // Измеряем второй баннер — «Академия вампиров»
-      showSlide(1);
+      showSlide(2);
 
       const referenceHeight = Math.ceil(
         heroInner.getBoundingClientRect().height
@@ -367,11 +390,20 @@ async function loadHero() {
       showSlide(0);
     }
 
-    // Переключение между тремя книгами
-    dots.forEach((dot, index) => {
-      dot.addEventListener("click", () => {
-        showSlide(index);
-      });
+    // Переключение баннеров боковыми стрелками
+
+    prevArrow?.addEventListener("click", () => {
+      const previousIndex =
+        (activeSlide - 1 + slides.length) % slides.length;
+
+      showSlide(previousIndex);
+    });
+
+    nextArrow?.addEventListener("click", () => {
+      const nextIndex =
+        (activeSlide + 1) % slides.length;
+
+      showSlide(nextIndex);
     });
 
   } catch (error) {
