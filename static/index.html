@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FIREBOOKS — книжный магазин</title>
   <link rel="stylesheet" href="/static/style.css">
-  <link rel="stylesheet" href="/static/hero-art.css">
+  <!-- <link rel="stylesheet" href="/static/hero-art.css"> -->
 </head>
 <body>
 
@@ -118,20 +118,24 @@
         </p>
       </div>
       <a href="/catalog" class="btn btn--hero" id="hero-buy">Купить сейчас &rarr;</a>
-      <div class="hero__dots">
-        <button type="button" class="dot dot--active"
-                aria-label="Четвёртое крыло"></button>
-
-        <button type="button" class="dot"
-                aria-label="Академия вампиров"></button>
-
-        <button type="button" class="dot"
-                aria-label="Гордость и предубеждение"></button>
-      </div>
     </div>
     <div class="hero__cover">
       <img id="hero-cover" src="/static/img/0194612e-c1aa-77ef-b35f-892218e71e36.png" alt="Обложка Четвёртое крыло">
     </div>
+    <!-- Стрелки переключения баннеров -->
+    <button
+      type="button"
+      class="hero__arrow hero__arrow--prev"
+      id="hero-prev"
+      aria-label="Предыдущий баннер"
+    >‹</button>
+
+    <button
+      type="button"
+      class="hero__arrow hero__arrow--next"
+      id="hero-next"
+      aria-label="Следующий баннер"
+    >›</button>
   </div>
 </section>
 

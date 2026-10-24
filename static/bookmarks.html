@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Закладки — FIREBOOKS</title>
   <link rel="stylesheet" href="/static/style.css">
-  <link rel="stylesheet" href="/static/cabinet.css">
-  <link rel="stylesheet" href="/static/firebooks_cabinet_mobile.css">
+  <link rel="stylesheet" href="/static/firebooks_cabinet_module.css">
 
   <style>
   @media (max-width: 768px) {
@@ -347,6 +346,64 @@
     savedFavoriteIds = extractFavoriteIds(await response.json());
   }
 
+    async function migrateOldFavorites() {
+    const localIds = extractFavoriteIds(
+      readArray(FAVORITES_KEY)
+    ).filter(id => /^[1-9]\d*$/.test(id));
+
+    if (!localIds.length) return;
+
+    try {
+      const authResponse = await fetch("/api/auth/me", {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+
+      if (!authResponse.ok) return;
+
+      const authData = await authResponse.json();
+      const userId = authData.user?.id;
+
+      if (userId == null) return;
+
+      const migrationKey =
+        "firebooks_favorites_migrated_" + userId;
+
+      // Не переносим одни и те же старые закладки повторно.
+      if (localStorage.getItem(migrationKey) === "1") {
+        return;
+      }
+
+      const results = await Promise.all(
+        localIds.map(id =>
+          fetch(
+            "/api/favorites/" + encodeURIComponent(id),
+            {
+              method: "PUT",
+              credentials: "same-origin"
+            }
+          )
+        )
+      );
+
+      if (results.every(response => response.ok)) {
+        localStorage.setItem(migrationKey, "1");
+        console.log(
+          "FIREBOOKS: старые закладки перенесены в аккаунт"
+        );
+      } else {
+        console.warn(
+          "FIREBOOKS: часть закладок не удалось перенести"
+        );
+      }
+    } catch (error) {
+      console.warn(
+        "FIREBOOKS: ошибка переноса старых закладок",
+        error
+      );
+    }
+  }
+
   async function updateProfile() {
     try {
       const response = await fetch("/api/auth/me", {
@@ -374,23 +431,10 @@
     document.getElementById("bookmarks-count").textContent =
       favoriteIds().length;
 
-    document.getElementById("reviews-count").textContent =
-      readArray(REVIEWS_KEY).length;
-
-    // Количество разных книг в оформленных заказах.
-    const purchased = new Set();
-
-    readArray(ORDERS_KEY).forEach(order => {
-      if (!Array.isArray(order.items)) return;
-
-      order.items.forEach(item => {
-        const id = bookId(item);
-        if (id) purchased.add(id);
-      });
-    });
-
-    document.getElementById("library-count").textContent =
-      purchased.size;
+    // Сообщаем общему меню, что данные изменились.
+    document.dispatchEvent(
+      new Event("firebooks:counts-changed")
+    );
   }
 
   function make(tag, className, text) {
@@ -606,6 +650,7 @@
   loading.hidden = false;
 
   try {
+    await migrateOldFavorites();
     await loadFavoriteIds();
 
     if (currentVersion !== renderVersion) return;

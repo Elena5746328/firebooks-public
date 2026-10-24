@@ -6,8 +6,7 @@
   <title>Мои отзывы — FIREBOOKS</title>
 
   <link rel="stylesheet" href="/static/style.css">
-  <link rel="stylesheet" href="/static/cabinet.css">
-  <link rel="stylesheet" href="/static/firebooks_cabinet_mobile.css">
+  <link rel="stylesheet" href="/static/firebooks_cabinet_module.css">
 
   <style>
     [hidden] {
@@ -501,6 +500,7 @@
 
   let editingIndex = -1;
   let selectedRating = 0;
+  let serverReviews = [];
 
   function readArray(key) {
     try {
@@ -551,7 +551,51 @@
   }
 
   function getReviews() {
-    return readArray(REVIEWS_KEY);
+    return serverReviews;
+  }
+
+  async function loadMyReviews() {
+    try {
+      const response = await fetch("/api/reviews/mine", {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+
+      if (response.status === 401) {
+        serverReviews = [];
+
+        updateCounters();
+        renderReviews();
+
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          "Ошибка загрузки отзывов: " + response.status
+        );
+      }
+
+      const data = await response.json();
+
+      serverReviews = Array.isArray(data.reviews)
+        ? data.reviews
+        : [];
+
+      updateCounters();
+      renderReviews();
+
+    } catch (error) {
+      console.error(
+        "FIREBOOKS: ошибка загрузки отзывов",
+        error
+      );
+
+      grid.replaceChildren();
+      empty.hidden = false;
+      empty.textContent =
+        "Не удалось загрузить отзывы. Обновите страницу.";
+    }
   }
 
   function getPurchasedCount() {
@@ -893,11 +937,13 @@
     selectedRating = 0;
   }
 
-  function deleteReview(index) {
-    const reviews = getReviews();
-    const review = reviews[index];
+  async function deleteReview(index) {
+    const review = getReviews()[index];
 
-    if (!review) return;
+    if (!review || !review.id) {
+      alert("Не удалось определить отзыв. Обновите страницу.");
+      return;
+    }
 
     const title = getReviewTitle(review);
 
@@ -907,18 +953,41 @@
       return;
     }
 
-    reviews.splice(index, 1);
-
     try {
-      saveArray(REVIEWS_KEY, reviews);
-    } catch (error) {
-      console.error(error);
-      alert("Не удалось удалить отзыв.");
-      return;
-    }
+      const response = await fetch(
+        "/api/reviews/" + encodeURIComponent(review.id),
+        {
+          method: "DELETE",
+          credentials: "same-origin"
+        }
+      );
 
-    updateCounters();
-    renderReviews();
+      const result = await response.json().catch(
+        () => ({})
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          typeof result.detail === "string"
+            ? result.detail
+            : "Ошибка сервера: " + response.status
+        );
+      }
+
+      // Обновляем отзывы из настоящей базы данных.
+      await loadMyReviews();
+
+    } catch (error) {
+      console.error(
+        "FIREBOOKS: ошибка удаления отзыва",
+        error
+      );
+
+      alert(
+        "Не удалось удалить отзыв: " +
+        error.message
+      );
+    }
   }
 
   document.querySelectorAll(
@@ -957,7 +1026,7 @@
 
   document.getElementById(
     "edit-form"
-  ).addEventListener("submit", event => {
+  ).addEventListener("submit", async event => {
     event.preventDefault();
 
     if (editingIndex < 0) return;
@@ -981,28 +1050,66 @@
       return;
     }
 
-    const reviews = getReviews();
+  const review = getReviews()[editingIndex];
 
-    if (!reviews[editingIndex]) return;
-
-    reviews[editingIndex] = {
-      ...reviews[editingIndex],
-      rating: selectedRating,
-      text: text,
-      updatedAt: new Date().toISOString()
-    };
-
-    try {
-      saveArray(REVIEWS_KEY, reviews);
-    }catch (error) {
-      console.error(error);
-      alert("Не удалось сохранить изменения.");
+    if (!review || !review.id) {
+      alert("Не удалось определить отзыв. Обновите страницу.");
       return;
     }
 
-    closeEditModal();
-    updateCounters();
-    renderReviews();
+    const saveButton = document.querySelector(
+      "#edit-form .reviews__save"
+    );
+
+    saveButton.disabled = true;
+
+    try {
+      const response = await fetch(
+        "/api/reviews/" + encodeURIComponent(review.id),
+        {
+          method: "PUT",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            rating: selectedRating,
+            text: text
+          })
+        }
+      );
+
+      const result = await response.json().catch(
+        () => ({})
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          typeof result.detail === "string"
+            ? result.detail
+            : "Ошибка сервера: " + response.status
+        );
+      }
+
+      closeEditModal();
+
+      // Получаем обновлённый отзыв из SQLite.
+      await loadMyReviews();
+
+    } catch (error) {
+      console.error(
+        "FIREBOOKS: ошибка редактирования отзыва",
+        error
+      );
+
+      alert(
+        "Не удалось сохранить изменения: " +
+        error.message
+      );
+
+    } finally {
+      saveButton.disabled = false;
+    }
   });
 
   window.addEventListener("storage", event => {
@@ -1017,8 +1124,7 @@
   });
 
   updateProfile();
-  updateCounters();
-  renderReviews();
+  loadMyReviews();
 })();
 </script>
 

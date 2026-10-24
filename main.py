@@ -7,6 +7,7 @@ from favorites_backend import router as favorites_router
 from cart_backend import router as cart_router
 from orders_backend import router as orders_router
 from update_book_details import main as update_book_details
+from reviews_backend import router as reviews_router
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
@@ -499,15 +500,8 @@ def prepare_book(data):
     Получает книгу из SQLite и добавляет отзывы
     из базы данных FIREBOOKS.
     """
-    if data is None:
-        return None
 
     book = Book.model_validate(data)
-
-    # Пока подключаем новые отзывы только для двух книг.
-    # Остальной каталог не изменяем.
-    if book.id not in (101, 102):
-        return book
 
     connection = get_connection()
 
@@ -528,6 +522,11 @@ def prepare_book(data):
         ).fetchall()
     finally:
         connection.close()
+
+    # Для остальных книг сохраняем прежний рейтинг,
+    # пока в базе нет опубликованных отзывов.
+    if not rows and book.id not in (101, 102):
+        return book
 
     book.reviews = []
 
@@ -639,6 +638,7 @@ app.include_router(auth_router)
 app.include_router(favorites_router)
 app.include_router(cart_router)
 app.include_router(orders_router)
+app.include_router(reviews_router)
 
 app.mount(
     "/static",
